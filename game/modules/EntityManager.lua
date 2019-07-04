@@ -58,4 +58,11 @@ function EntityManager:remove(entity)
     return entity
 end
 
+-- 呼び出し
+function EntityManager:call(event, ...)
+    for _, entity in ipairs(self.entities) do
+        lume.call(entity[event], ...)
+    end
+end
+
 return EntityManager
