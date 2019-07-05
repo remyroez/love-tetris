@@ -61,7 +61,7 @@ end
 -- 呼び出し
 function EntityManager:call(event, ...)
     for _, entity in ipairs(self.entities) do
-        lume.call(entity[event], ...)
+        lume.call(entity[event], entity, ...)
     end
 end
 
