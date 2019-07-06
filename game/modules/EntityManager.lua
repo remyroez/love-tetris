@@ -22,16 +22,12 @@ end
 
 -- 更新
 function EntityManager:update(dt)
-    for _, entity in ipairs(self.entities) do
-        entity:update(dt)
-    end
+    self:call('update', dt)
 end
 
 -- 描画
 function EntityManager:draw()
-    for _, entity in ipairs(self.entities) do
-        entity:draw()
-    end
+    self:call('draw')
 end
 
 -- クリア
