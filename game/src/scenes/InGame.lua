@@ -23,12 +23,10 @@ end
 
 -- 描画
 function InGame:draw()
-    love.graphics.print('Hello, InGame!')
 end
 
 -- キー入力
 function InGame:keypressed(key, scancode, isrepeat)
-    print('InGame', 'keypressed', key, scancode, isrepeat)
 end
 
 return InGame
