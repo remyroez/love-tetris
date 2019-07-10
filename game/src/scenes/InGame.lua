@@ -10,11 +10,16 @@ local InGame = class('InGame', Entity)
 
 -- クラス
 local EntityManager = require 'EntityManager'
+local Tetrimino = require 'Tetrimino'
 
 -- 初期化
 function InGame:initialize()
     Entity.initialize(self)
+    self.width, self.height = love.graphics.getDimensions()
     self.manager = EntityManager()
+    for i = 1, 10 do
+        self.manager:add(Tetrimino{ x = love.math.random(self.width), y = love.math.random(self.height) })
+    end
 end
 
 -- 破棄
