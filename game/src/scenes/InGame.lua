@@ -13,12 +13,20 @@ local EntityManager = require 'EntityManager'
 local Tetrimino = require 'Tetrimino'
 
 -- 初期化
-function InGame:initialize()
+function InGame:initialize(t)
     Entity.initialize(self)
-    self.width, self.height = love.graphics.getDimensions()
+
+    self.width = t.width or 800
+    self.height = t.height or 600
+    self.spriteSheetTiles = t.spriteSheetTiles
+    self.spriteSheetParticles = t.spriteSheetParticles
+
     self.manager = EntityManager()
     for i = 1, 10 do
-        self.manager:add(Tetrimino{ x = love.math.random(self.width), y = love.math.random(self.height) })
+        self.manager:add(Tetrimino{
+            spriteSheet = self.spriteSheetTiles,
+            x = love.math.random(self.width), y = love.math.random(self.height)
+        })
     end
 end
 

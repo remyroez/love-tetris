@@ -9,6 +9,10 @@ local Application = require 'Application'
 local EntityStack = require 'EntityStack'
 local InGame = require 'scenes.InGame'
 
+-- エイリアス
+local lg = love.graphics
+local la = love.audio
+
 -- 初期化
 function Game:initialize(...)
     Application.initialize(self, ...)
@@ -16,8 +20,22 @@ end
 
 -- 読み込み
 function Game:load(...)
+    -- 画面のサイズ
+    local width, height = lg.getDimensions()
+    self.width = width
+    self.height = height
+
+    -- スプライトシートの読み込み
+    self.spriteSheetParticles = sbss:new('assets/spritesheet_particles.xml')
+    self.spriteSheetTiles = sbss:new('assets/spritesheet_tiles.xml')
+
     self.scene = EntityStack()
-    self.scene:add(InGame())
+    self.scene:add(InGame{
+        width = self.width,
+        height = self.height,
+        spriteSheetTiles = self.spriteSheetTiles,
+        spriteSheetParticles = self.spriteSheetParticles,
+    })
 end
 
 -- 更新
@@ -40,10 +58,6 @@ function Game:keyreleased(key, scancode)
     self.scene:call('keyreleased', key, scancode)
 end
 
--- テキスト入力
-function Game:textinput(text)
-end
-
 -- マウス入力
 function Game:mousepressed(x, y, button, istouch, presses)
     self.scene:call('mousepressed', x, y, button, istouch, presses)
@@ -52,16 +66,4 @@ end
 -- マウス離した
 function Game:mousereleased(x, y, button, istouch, presses)
     self.scene:call('mousereleased', x, y, button, istouch, presses)
-end
-
--- マウス移動
-function Game:mousemoved(x, y, dx, dy, istouch)
-end
-
--- マウスホイール
-function Game:wheelmoved(x, y)
-end
-
--- リサイズ
-function Game:resize(width, height)
 end
