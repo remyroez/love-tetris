@@ -9,6 +9,7 @@ local Entity = require 'Entity'
 local Tetrimino = class('Tetrimino', Entity)
 Tetrimino:include(require 'SpriteRenderer')
 
+-- スプライト名
 Tetrimino.static.spriteNames = {
     black = "tileBlack_15.png",
     blue = "tileBlue_15.png",
@@ -20,6 +21,18 @@ Tetrimino.static.spriteNames = {
     yellow = "tileYellow_15.png",
 }
 
+-- 色
+Tetrimino.static.colors = {
+    'black',
+    'blue',
+    'green',
+    'grey',
+    'orange',
+    'pink',
+    'red',
+    'yellow',
+}
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -29,6 +42,7 @@ function Tetrimino:initialize(t)
 
     self.x = t.x or 0
     self.y = t.y or 0
+    self.color = t.color or 'red'
 end
 
 -- 破棄
@@ -41,7 +55,7 @@ end
 
 -- 描画
 function Tetrimino:draw()
-    self:drawSprite(Tetrimino.spriteNames.red, self.x, self.y)
+    self:drawSprite(Tetrimino.spriteNames[self.color], self.x, self.y)
 end
 
 return Tetrimino
