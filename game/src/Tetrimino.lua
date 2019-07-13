@@ -43,6 +43,13 @@ function Tetrimino:initialize(t)
     self.x = t.x or 0
     self.y = t.y or 0
     self.color = t.color or 'red'
+    self.blockWidth, self.blockHeight = self:getSpriteSize(self:getBlockSpriteName())
+    self.array = t.array or {
+        { false, true, false, false, },
+        { true, true, true, false, },
+        { false, true, false, false, },
+        { false, false, false, false, },
+    }
 end
 
 -- 破棄
@@ -55,7 +62,29 @@ end
 
 -- 描画
 function Tetrimino:draw()
-    self:drawSprite(Tetrimino.spriteNames[self.color], self.x, self.y)
+    local x, y = self.x, self.y
+    for v, line in ipairs(self.array) do
+        for h, block in ipairs(line) do
+            x = x + self.blockWidth
+            if block then
+                self:drawBlock(x, y)
+            end
+        end
+        x = self.x
+        y = y + self.blockHeight
+    end
+end
+
+-- ブロックのスプライト名を返す
+function Tetrimino:getBlockSpriteName()
+    return Tetrimino.spriteNames[self.color]
+end
+
+-- ブロックの描画
+function Tetrimino:drawBlock(x, y)
+    x = x or self.x or 0
+    y = y or self.y or 0
+    self:drawSprite(self:getBlockSpriteName(), x, y)
 end
 
 return Tetrimino
