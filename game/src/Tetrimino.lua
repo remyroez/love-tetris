@@ -33,6 +33,40 @@ Tetrimino.static.colors = {
     'yellow',
 }
 
+-- 配列
+Tetrimino.static.arrays = {
+    I = {
+        { true, true, true, true, },
+    },
+    O = {
+        { true, true, },
+        { true, true, },
+    },
+    S = {
+        { false, true, true },
+        { true, true, false },
+    },
+    Z = {
+        { true, true, false },
+        { false, true, true },
+    },
+    J = {
+        { true, false, false },
+        { true, true, true },
+    },
+    L = {
+        { false, false, true },
+        { true, true, true },
+    },
+    T = {
+        { false, true, false },
+        { true, true, true },
+    },
+}
+
+-- 配列名
+Tetrimino.static.arrayNames = lume.keys(Tetrimino.arrays)
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -44,12 +78,7 @@ function Tetrimino:initialize(t)
     self.y = t.y or 0
     self.color = t.color or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(self:getBlockSpriteName())
-    self.array = t.array or {
-        { false, true, false, false, },
-        { true, true, true, false, },
-        { false, true, false, false, },
-        { false, false, false, false, },
-    }
+    self.array = t.array or Tetrimino.arrays.I
 end
 
 -- 破棄
@@ -65,10 +94,10 @@ function Tetrimino:draw()
     local x, y = self.x, self.y
     for v, line in ipairs(self.array) do
         for h, block in ipairs(line) do
-            x = x + self.blockWidth
             if block then
                 self:drawBlock(x, y)
             end
+            x = x + self.blockWidth
         end
         x = self.x
         y = y + self.blockHeight
