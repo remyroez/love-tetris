@@ -76,6 +76,7 @@ function Tetrimino:initialize(t)
 
     self.x = t.x or 0
     self.y = t.y or 0
+    self.scale = t.scale or 1
     self.color = t.color or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(self:getBlockSpriteName())
     self.array = t.array or Tetrimino.arrays.I
@@ -91,7 +92,10 @@ end
 
 -- 描画
 function Tetrimino:draw()
-    local x, y = self.x, self.y
+    love.graphics.push()
+    love.graphics.translate(self.x, self.y)
+    love.graphics.scale(self.scale)
+    local x, y = 0, 0
     for v, line in ipairs(self.array) do
         for h, block in ipairs(line) do
             if block then
@@ -99,9 +103,10 @@ function Tetrimino:draw()
             end
             x = x + self.blockWidth
         end
-        x = self.x
+        x = 0
         y = y + self.blockHeight
     end
+    love.graphics.pop()
 end
 
 -- ブロックのスプライト名を返す
