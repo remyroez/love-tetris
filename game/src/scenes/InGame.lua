@@ -26,6 +26,7 @@ function InGame:initialize(t)
         self.manager:add(Tetrimino{
             spriteSheet = self.spriteSheetTiles,
             x = love.math.random(self.width), y = love.math.random(self.height),
+            rotation = love.math.random() * math.pi * 2,
             scale = 0.25,
             color = Tetrimino.colors[love.math.random(#Tetrimino.colors)],
             array = Tetrimino.arrays[Tetrimino.arrayNames[love.math.random(#Tetrimino.arrayNames)]]

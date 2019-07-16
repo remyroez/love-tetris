@@ -76,6 +76,7 @@ function Tetrimino:initialize(t)
 
     self.x = t.x or 0
     self.y = t.y or 0
+    self.rotation = t.rotation or 0
     self.scale = t.scale or 1
     self.color = t.color or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(self:getBlockSpriteName())
@@ -88,6 +89,10 @@ end
 
 -- 更新
 function Tetrimino:update(dt)
+    self.rotation = self.rotation + (dt or 0.033)
+    if self.rotation > math.pi * 2 then
+        self.rotation = self.rotation - math.pi * 2
+    end
 end
 
 -- 描画
@@ -95,6 +100,7 @@ function Tetrimino:draw()
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
     love.graphics.scale(self.scale)
+    love.graphics.rotate(self.rotation)
     local x, y = 0, 0
     for v, line in ipairs(self.array) do
         for h, block in ipairs(line) do
