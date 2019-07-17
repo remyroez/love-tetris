@@ -40,7 +40,7 @@ end
 
 -- 更新
 function Game:update(dt, ...)
-    self.scene:update()
+    self.scene:update(dt)
 end
 
 -- 描画

@@ -89,7 +89,7 @@ end
 
 -- 更新
 function Tetrimino:update(dt)
-    self.rotation = self.rotation + (dt or 0.033)
+    self.rotation = self.rotation + dt
     if self.rotation > math.pi * 2 then
         self.rotation = self.rotation - math.pi * 2
     end
