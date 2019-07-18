@@ -1,0 +1,10 @@
+<TextureAtlas imagePath="spritesheet_tiles.png">
+	<SubTexture name="tileBlack_15.png" x="0" y="270" width="88" height="88"/>
+	<SubTexture name="tileBlue_15.png" x="90" y="90" width="88" height="88"/>
+	<SubTexture name="tileGreen_15.png" x="90" y="0" width="88" height="88"/>
+	<SubTexture name="tileGrey_15.png" x="0" y="360" width="88" height="88"/>
+	<SubTexture name="tileOrange_14.png" x="90" y="180" width="88" height="88"/>
+	<SubTexture name="tilePink_15.png" x="0" y="180" width="88" height="88"/>
+	<SubTexture name="tileRed_15.png" x="0" y="90" width="88" height="88"/>
+	<SubTexture name="tileYellow_15.png" x="0" y="0" width="88" height="88"/>
+</TextureAtlas>

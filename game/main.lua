@@ -1,4 +1,8 @@
 
+-- グローバルに影響があるライブラリ
+require 'autobatch'
+require 'sbss'
+
 -- デバッグモード
 local debugMode = true
 
