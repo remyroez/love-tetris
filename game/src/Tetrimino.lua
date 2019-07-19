@@ -22,16 +22,7 @@ Tetrimino.static.spriteNames = {
 }
 
 -- 色
-Tetrimino.static.colors = {
-    'black',
-    'blue',
-    'green',
-    'grey',
-    'orange',
-    'pink',
-    'red',
-    'yellow',
-}
+Tetrimino.static.colors = lume.keys(Tetrimino.spriteNames)
 
 -- 配列
 Tetrimino.static.arrays = {
@@ -67,6 +58,22 @@ Tetrimino.static.arrays = {
 -- 配列名
 Tetrimino.static.arrayNames = lume.keys(Tetrimino.arrays)
 
+-- カラー配列の作成
+function Tetrimino.static.makeColorArray(array, color)
+    array = array or Tetrimino.arrays.I
+    color = color or 'red'
+
+    local t = {}
+    for v, line in ipairs(array) do
+        local l = {}
+        for h, block in ipairs(line) do
+            table.insert(l, block and color or false)
+        end
+        table.insert(t, l)
+    end
+    return t
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -78,9 +85,8 @@ function Tetrimino:initialize(t)
     self.y = t.y or 0
     self.rotation = t.rotation or 0
     self.scale = t.scale or 1
-    self.color = t.color or 'red'
-    self.blockWidth, self.blockHeight = self:getSpriteSize(self:getBlockSpriteName())
-    self.array = t.array or Tetrimino.arrays.I
+    self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[t.color or 'red'])
+    self.colorArray = t.colorArray or Tetrimino.makeColorArray(t.array, t.color)
 end
 
 -- 破棄
@@ -102,10 +108,10 @@ function Tetrimino:draw()
     love.graphics.scale(self.scale)
     love.graphics.rotate(self.rotation)
     local x, y = 0, 0
-    for v, line in ipairs(self.array) do
-        for h, block in ipairs(line) do
-            if block then
-                self:drawBlock(x, y)
+    for v, line in ipairs(self.colorArray) do
+        for h, color in ipairs(line) do
+            if color then
+                self:drawBlock(x, y, color)
             end
             x = x + self.blockWidth
         end
@@ -115,16 +121,12 @@ function Tetrimino:draw()
     love.graphics.pop()
 end
 
--- ブロックのスプライト名を返す
-function Tetrimino:getBlockSpriteName()
-    return Tetrimino.spriteNames[self.color]
-end
-
 -- ブロックの描画
-function Tetrimino:drawBlock(x, y)
+function Tetrimino:drawBlock(x, y, color)
     x = x or self.x or 0
     y = y or self.y or 0
-    self:drawSprite(self:getBlockSpriteName(), x, y)
+    color = color or 'red'
+    self:drawSprite(Tetrimino.spriteNames[color], x, y)
 end
 
 return Tetrimino
