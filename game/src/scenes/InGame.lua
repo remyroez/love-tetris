@@ -22,7 +22,24 @@ function InGame:initialize(t)
     self.spriteSheetParticles = t.spriteSheetParticles
 
     self.manager = EntityManager()
-    for i = 1, 10 do
+
+    local t = Tetrimino{
+        spriteSheet = self.spriteSheetTiles,
+        x = 0, y = 0,
+        rotation = 0,
+        scale = 0.25,
+        color = Tetrimino.colors.red,
+        array = Tetrimino.arrays.I
+    }
+    self.stage = self.manager:add(Tetrimino{
+        spriteSheet = self.spriteSheetTiles,
+        x = 0, y = 0,
+        rotation = 0,
+        scale = 0.25,
+        colorArray = {}
+    })
+    self.stage:merge(0, 0, t.colorArray)
+    for i = 1, 0 do
         self.manager:add(Tetrimino{
             spriteSheet = self.spriteSheetTiles,
             x = love.math.random(self.width), y = love.math.random(self.height),

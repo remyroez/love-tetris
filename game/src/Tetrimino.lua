@@ -95,10 +95,6 @@ end
 
 -- 更新
 function Tetrimino:update(dt)
-    self.rotation = self.rotation + dt
-    if self.rotation > math.pi * 2 then
-        self.rotation = self.rotation - math.pi * 2
-    end
 end
 
 -- 描画
@@ -127,6 +123,19 @@ function Tetrimino:drawBlock(x, y, color)
     y = y or self.y or 0
     color = color or 'red'
     self:drawSprite(Tetrimino.spriteNames[color], x, y)
+end
+
+-- ブロックの描画
+function Tetrimino:merge(x, y, colorArray)
+    local max = y + #colorArray
+    for i = #self.colorArray, max - 1 do
+        table.insert(self.colorArray, {})
+    end
+
+    for v, line in ipairs(self.colorArray) do
+        for h, color in ipairs(line) do
+        end
+    end
 end
 
 return Tetrimino
