@@ -125,15 +125,42 @@ function Tetrimino:drawBlock(x, y, color)
     self:drawSprite(Tetrimino.spriteNames[color], x, y)
 end
 
--- ブロックの描画
+-- ブロックのマージ
 function Tetrimino:merge(x, y, colorArray)
-    local max = y + #colorArray
-    for i = #self.colorArray, max - 1 do
-        table.insert(self.colorArray, {})
+    x = x or 0
+    y = y or 0
+    if x < 0 then return end
+    if y < 0 then return end
+    if colorArray == nil then return end
+
+    -- 高さ拡張
+    local height = y + #colorArray
+    if height > #self.colorArray then
+        for i = #self.colorArray, height - 1 do
+            table.insert(self.colorArray, {})
+        end
     end
 
+    -- 幅拡張
+    local width = x + #colorArray[1]
+    if width > #self.colorArray[1] then
+        for v, line in ipairs(self.colorArray) do
+            for i = #line, width - 1 do
+                table.insert(line, false)
+            end
+        end
+    end
+
+    -- マージ
     for v, line in ipairs(self.colorArray) do
         for h, color in ipairs(line) do
+            local tx, ty = h - 1, v - 1
+            if (tx >= x) and (ty >= y) and (tx <= width) and (ty <= height) then
+                local i, j = tx - x + 1, ty - y + 1
+                if colorArray[j][i] then
+                    line[h] = colorArray[j][i]
+                end
+            end
         end
     end
 end

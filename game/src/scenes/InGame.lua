@@ -23,14 +23,6 @@ function InGame:initialize(t)
 
     self.manager = EntityManager()
 
-    local t = Tetrimino{
-        spriteSheet = self.spriteSheetTiles,
-        x = 0, y = 0,
-        rotation = 0,
-        scale = 0.25,
-        color = Tetrimino.colors.red,
-        array = Tetrimino.arrays.I
-    }
     self.stage = self.manager:add(Tetrimino{
         spriteSheet = self.spriteSheetTiles,
         x = 0, y = 0,
@@ -38,7 +30,28 @@ function InGame:initialize(t)
         scale = 0.25,
         colorArray = {}
     })
-    self.stage:merge(0, 0, t.colorArray)
+    do
+        local t = Tetrimino{
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            rotation = 0,
+            scale = 0.25,
+            color = 'red',
+            array = Tetrimino.arrays.S
+        }
+        self.stage:merge(1, 1, t.colorArray)
+    end
+    do
+        local t = Tetrimino{
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            rotation = 0,
+            scale = 0.25,
+            color = 'blue',
+            array = Tetrimino.arrays.T
+        }
+        self.stage:merge(1, 2, t.colorArray)
+    end
     for i = 1, 0 do
         self.manager:add(Tetrimino{
             spriteSheet = self.spriteSheetTiles,
