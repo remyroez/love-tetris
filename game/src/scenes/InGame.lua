@@ -50,7 +50,7 @@ function InGame:initialize(t)
             color = 'blue',
             array = Tetrimino.arrays.T
         }
-        self.stage:merge(1, 2, t.colorArray)
+        self.stage:merge(2, 2, t.colorArray)
     end
     for i = 1, 0 do
         self.manager:add(Tetrimino{

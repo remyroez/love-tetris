@@ -136,7 +136,7 @@ function Tetrimino:merge(x, y, colorArray)
     -- 高さ拡張
     local height = y + #colorArray
     if height > #self.colorArray then
-        for i = #self.colorArray, height - 1 do
+        while height >= #self.colorArray do
             table.insert(self.colorArray, {})
         end
     end
@@ -157,7 +157,9 @@ function Tetrimino:merge(x, y, colorArray)
             local tx, ty = h - 1, v - 1
             if (tx >= x) and (ty >= y) and (tx <= width) and (ty <= height) then
                 local i, j = tx - x + 1, ty - y + 1
-                if colorArray[j][i] then
+                if colorArray[j] == nil then
+                    -- 不正な座標？
+                elseif colorArray[j][i] then
                     line[h] = colorArray[j][i]
                 end
             end
