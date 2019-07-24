@@ -28,7 +28,7 @@ function InGame:initialize(t)
         x = 0, y = 0,
         rotation = 0,
         scale = 0.25,
-        colorArray = {}
+        colorArray = Tetrimino.makeArray(10, 20, 'black')
     })
     do
         local t = Tetrimino{
