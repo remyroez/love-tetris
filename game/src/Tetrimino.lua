@@ -74,6 +74,25 @@ function Tetrimino.static.makeColorArray(array, color)
     return t
 end
 
+-- 配列の作成
+function Tetrimino.static.makeArray(width, height, color)
+    width = width or 0
+    height = height or 1
+    if color == nil then
+        color = false
+    end
+
+    local t = {}
+    for i = 1, height do
+        local l = {}
+        for j = 1, width do
+            table.insert(l, color)
+        end
+        table.insert(t, l)
+    end
+    return t
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
