@@ -28,29 +28,40 @@ function InGame:initialize(t)
         x = 0, y = 0,
         rotation = 0,
         scale = 0.25,
-        colorArray = Tetrimino.makeArray(10, 20, 'black')
+        colorArray = Tetrimino.makeArray(10, 20)
     })
     do
-        local t = Tetrimino{
-            spriteSheet = self.spriteSheetTiles,
-            x = 0, y = 0,
-            rotation = 0,
-            scale = 0.25,
-            color = 'red',
-            array = Tetrimino.arrays.S
-        }
-        self.stage:merge(1, 1, t.colorArray)
+        local t = { Tetrimino.makeLine(self.stage.width, 'grey') }
+        self.stage:merge(0, 14, t)
     end
     do
-        local t = Tetrimino{
-            spriteSheet = self.spriteSheetTiles,
-            x = 0, y = 0,
-            rotation = 0,
-            scale = 0.25,
-            color = 'blue',
-            array = Tetrimino.arrays.T
-        }
-        self.stage:merge(2, 2, t.colorArray)
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.I, 'grey')
+        self.stage:merge(0, 17, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.O, 'yellow')
+        self.stage:merge(8, 18, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.S, 'green')
+        self.stage:merge(1, 18, t)
+        self.stage:merge(5, 15, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.Z, 'red')
+        self.stage:merge(7, 16, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.J, 'blue')
+        self.stage:merge(0, 15, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.L, 'orange')
+        self.stage:merge(7, 12, t)
+    end
+    do
+        local t = Tetrimino.makeColorArray(Tetrimino.arrays.T, 'pink')
+        self.stage:merge(6, 11, t)
     end
     for i = 1, 0 do
         self.manager:add(Tetrimino{
@@ -77,11 +88,15 @@ end
 
 -- 描画
 function InGame:draw()
+    love.graphics.rectangle('line', 0, 0, self.stage:getDimensions())
     self.manager:draw()
 end
 
 -- キー入力
 function InGame:keypressed(key, scancode, isrepeat)
+    if key == 'space' then
+        print(self.stage:score())
+    end
 end
 
 return InGame

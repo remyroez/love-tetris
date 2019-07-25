@@ -74,6 +74,21 @@ function Tetrimino.static.makeColorArray(array, color)
     return t
 end
 
+-- 列の作成
+function Tetrimino.static.makeLine(width, color)
+    width = width or 0
+    if color == nil then
+        color = false
+    end
+
+    local l = {}
+    for j = 1, width do
+        table.insert(l, color)
+    end
+
+    return l
+end
+
 -- 配列の作成
 function Tetrimino.static.makeArray(width, height, color)
     width = width or 0
@@ -84,11 +99,7 @@ function Tetrimino.static.makeArray(width, height, color)
 
     local t = {}
     for i = 1, height do
-        local l = {}
-        for j = 1, width do
-            table.insert(l, color)
-        end
-        table.insert(t, l)
+        table.insert(t, Tetrimino.makeLine(width, color))
     end
     return t
 end
@@ -106,6 +117,8 @@ function Tetrimino:initialize(t)
     self.scale = t.scale or 1
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[t.color or 'red'])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(t.array, t.color)
+    self.width = self.colorArray[1] == nil and 0 or #self.colorArray[1]
+    self.height = self.colorArray == nil and 0 or #self.colorArray
 end
 
 -- 破棄
@@ -184,6 +197,38 @@ function Tetrimino:merge(x, y, colorArray)
     end
 
     return true
+end
+
+-- スコア計算
+function Tetrimino:score()
+    local lines = {}
+
+    for v, line in ipairs(self.colorArray) do
+        local valid = 0
+        for h, color in ipairs(line) do
+            if color then
+                valid = valid + 1
+            end
+        end
+        if valid == #line then
+            table.insert(lines, v)
+        end
+    end
+
+    for i = 1, #lines do
+        table.remove(self.colorArray, lines[#lines - i + 1])
+    end
+
+    for i = 1, #lines do
+        table.insert(self.colorArray, 1, Tetrimino.makeLine(self.width))
+    end
+
+    return #lines
+end
+
+-- サイズ
+function Tetrimino:getDimensions()
+    return self.blockWidth * self.width * self.scale, self.blockHeight * self.height * self.scale
 end
 
 return Tetrimino
