@@ -63,15 +63,23 @@ function InGame:initialize(t)
         local t = Tetrimino.makeColorArray(Tetrimino.arrays.T, 'pink')
         self.stage:merge(6, 11, t)
     end
-    for i = 1, 0 do
+    do
+        local spriteSheet = self.spriteSheetTiles
+        local x, y = self.width / 3, self.height / 2
+        local scale = 0.25
+        local color = 'pink'
+        local array = Tetrimino.arrays.T
         self.manager:add(Tetrimino{
-            spriteSheet = self.spriteSheetTiles,
-            x = love.math.random(self.width), y = love.math.random(self.height),
-            rotation = love.math.random() * math.pi * 2,
-            scale = 0.25,
-            color = Tetrimino.colors[love.math.random(#Tetrimino.colors)],
-            array = Tetrimino.arrays[Tetrimino.arrayNames[love.math.random(#Tetrimino.arrayNames)]]
+            spriteSheet = spriteSheet, x = x, y = y, scale = scale, color = color, array = array
         })
+        for i = 1, 3 do
+            local t = self.manager:add(Tetrimino{
+                spriteSheet = spriteSheet,
+                x = x + 100 * i, y = y,
+                scale = scale, color = color, array = array
+            })
+            t:rotate(i)
+        end
     end
 end
 

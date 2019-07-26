@@ -27,7 +27,10 @@ Tetrimino.static.colors = lume.keys(Tetrimino.spriteNames)
 -- 配列
 Tetrimino.static.arrays = {
     I = {
+        { false, false, false, false, },
         { true, true, true, true, },
+        { false, false, false, false, },
+        { false, false, false, false, },
     },
     O = {
         { true, true, },
@@ -36,22 +39,27 @@ Tetrimino.static.arrays = {
     S = {
         { false, true, true },
         { true, true, false },
+        { false, false, false },
     },
     Z = {
         { true, true, false },
         { false, true, true },
+        { false, false, false },
     },
     J = {
         { true, false, false },
         { true, true, true },
+        { false, false, false },
     },
     L = {
         { false, false, true },
         { true, true, true },
+        { false, false, false },
     },
     T = {
         { false, true, false },
         { true, true, true },
+        { false, false, false },
     },
 }
 
@@ -102,6 +110,23 @@ function Tetrimino.static.makeArray(width, height, color)
         table.insert(t, Tetrimino.makeLine(width, color))
     end
     return t
+end
+
+-- 配列の作成
+function Tetrimino.static.rotateArray(array)
+    array = array or {}
+    local newArray = {}
+    local width = #array
+    local height = array[1] == nil and 0 or #array[1]
+    for v, line in ipairs(array) do
+        for h, color in ipairs(line) do
+            if newArray[h] == nil then
+                newArray[h] = {}
+            end
+            newArray[h][v] = color
+        end
+    end
+    return newArray
 end
 
 -- 初期化
@@ -155,6 +180,14 @@ function Tetrimino:drawBlock(x, y, color)
     y = y or self.y or 0
     color = color or 'red'
     self:drawSprite(Tetrimino.spriteNames[color], x, y)
+end
+
+-- ブロックの回転
+function Tetrimino:rotate(n)
+    n = n or 1
+    for i = 1, n do
+        self.colorArray = Tetrimino.rotateArray(self.colorArray)
+    end
 end
 
 -- ブロックのマージ
