@@ -63,6 +63,17 @@ Tetrimino.static.arrays = {
     },
 }
 
+-- 配列に対応する色
+Tetrimino.static.arrayColors = {
+    I = 'grey',
+    O = 'yellow',
+    S = 'green',
+    Z = 'red',
+    J = 'blue',
+    L = 'orange',
+    T = 'pink',
+}
+
 -- 配列名
 Tetrimino.static.arrayNames = lume.keys(Tetrimino.arrays)
 
@@ -113,17 +124,19 @@ function Tetrimino.static.makeArray(width, height, color)
 end
 
 -- 配列の作成
-function Tetrimino.static.rotateArray(array)
+function Tetrimino.static.rotateArray(array, newcolor)
     array = array or {}
-    local newArray = {}
+    if newcolor == nil then
+        newcolor = false
+    end
     local width = #array
     local height = array[1] == nil and 0 or #array[1]
+    local newArray = Tetrimino.makeArray(width, height, newcolor)
     for v, line in ipairs(array) do
         for h, color in ipairs(line) do
-            if newArray[h] == nil then
-                newArray[h] = {}
+            if color then
+                newArray[h][height - v + 1] = color
             end
-            newArray[h][v] = color
         end
     end
     return newArray
@@ -140,8 +153,10 @@ function Tetrimino:initialize(t)
     self.y = t.y or 0
     self.rotation = t.rotation or 0
     self.scale = t.scale or 1
-    self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[t.color or 'red'])
-    self.colorArray = t.colorArray or Tetrimino.makeColorArray(t.array, t.color)
+    local array = t.array or 'Z'
+    local color = t.color or Tetrimino.arrayColors[array] or 'red'
+    self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
+    self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
     self.width = self.colorArray[1] == nil and 0 or #self.colorArray[1]
     self.height = self.colorArray == nil and 0 or #self.colorArray
 end
@@ -183,10 +198,10 @@ function Tetrimino:drawBlock(x, y, color)
 end
 
 -- ブロックの回転
-function Tetrimino:rotate(n)
+function Tetrimino:rotate(n, newcolor)
     n = n or 1
     for i = 1, n do
-        self.colorArray = Tetrimino.rotateArray(self.colorArray)
+        self.colorArray = Tetrimino.rotateArray(self.colorArray, newcolor)
     end
 end
 

@@ -36,7 +36,7 @@ function InGame:initialize(t)
     end
     do
         local t = Tetrimino.makeColorArray(Tetrimino.arrays.I, 'grey')
-        self.stage:merge(0, 17, t)
+        self.stage:merge(0, 16, t)
     end
     do
         local t = Tetrimino.makeColorArray(Tetrimino.arrays.O, 'yellow')
@@ -65,20 +65,26 @@ function InGame:initialize(t)
     end
     do
         local spriteSheet = self.spriteSheetTiles
-        local x, y = self.width / 3, self.height / 2
+        local startX, startY = self.width / 3, 0
         local scale = 0.25
         local color = 'pink'
-        local array = Tetrimino.arrays.T
-        self.manager:add(Tetrimino{
-            spriteSheet = spriteSheet, x = x, y = y, scale = scale, color = color, array = array
-        })
-        for i = 1, 3 do
-            local t = self.manager:add(Tetrimino{
-                spriteSheet = spriteSheet,
-                x = x + 100 * i, y = y,
-                scale = scale, color = color, array = array
+        local x, y = startX, startY
+        for _, array in ipairs(Tetrimino.arrayNames) do
+            local base = self.manager:add(Tetrimino{
+                spriteSheet = spriteSheet, x = x, y = y, scale = scale, array = array
             })
-            t:rotate(i)
+            local w, h = base:getDimensions()
+            x = x + w + 8
+            for i = 1, 4 do
+                local t = self.manager:add(Tetrimino{
+                    spriteSheet = spriteSheet,
+                    x = x, y = y,
+                    scale = scale, array = array
+                })
+                t:rotate(i, 'black')
+                x = x + w + 8
+            end
+            x, y = startX, y + h + 8
         end
     end
 end
