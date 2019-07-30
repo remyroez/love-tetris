@@ -11,6 +11,7 @@ local InGame = class('InGame', Entity)
 -- クラス
 local EntityManager = require 'EntityManager'
 local Tetrimino = require 'Tetrimino'
+local Stage = require 'Stage'
 
 -- 初期化
 function InGame:initialize(t)
@@ -23,7 +24,7 @@ function InGame:initialize(t)
 
     self.manager = EntityManager()
 
-    self.stage = self.manager:add(Tetrimino{
+    self.stage = self.manager:add(Stage{
         spriteSheet = self.spriteSheetTiles,
         x = 0, y = 0,
         rotation = 0,

@@ -10,7 +10,7 @@ local Stage = class('Stage', Tetrimino)
 
 -- 初期化
 function Stage:initialize(t)
-    Tetrimino.initialize(self)
+    Tetrimino.initialize(self, t)
 end
 
 -- 破棄
@@ -81,7 +81,8 @@ function Stage:score()
                 valid = valid + 1
             end
         end
-        if valid == #line then
+        if valid > 0 and valid == #line then
+            print(v, #line)
             table.insert(lines, v)
         end
     end
