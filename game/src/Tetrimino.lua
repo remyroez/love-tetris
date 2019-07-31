@@ -142,6 +142,33 @@ function Tetrimino.static.rotateArray(array, newcolor)
     return newArray
 end
 
+-- 配列の次元の取得
+function Tetrimino.static.getArrayDimensions(array, fullcheck)
+    array = array or {}
+    if not fullcheck then
+        return (array[1] == nil and 0 or #array[1]), (array == nil and 0 or #array)
+    end
+
+    local w, h = 0, 0
+
+    for v, line in ipairs(array) do
+        local count = 0
+        for h, color in ipairs(line) do
+            if color then
+                count = count + 1
+            end
+        end
+        if count > w then
+            w = count
+        end
+        if count > 0 then
+            h = v
+        end
+    end
+
+    return w, h
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -157,8 +184,7 @@ function Tetrimino:initialize(t)
     local color = t.color or Tetrimino.arrayColors[array] or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
-    self.width = self.colorArray[1] == nil and 0 or #self.colorArray[1]
-    self.height = self.colorArray == nil and 0 or #self.colorArray
+    self.width, self.height = Tetrimino.getArrayDimensions(self.colorArray)
 end
 
 -- 破棄

@@ -36,8 +36,10 @@ function Stage:merge(x, y, colorArray)
     if x < 0 then return false end
     if y < 0 then return false end
 
+    local w, h = Tetrimino.getArrayDimensions(colorArray, true)
+
     -- 高さ拡張
-    local height = y + #colorArray
+    local height = y + h
     if height > #self.colorArray then
         while height >= #self.colorArray do
             table.insert(self.colorArray, {})
@@ -45,7 +47,7 @@ function Stage:merge(x, y, colorArray)
     end
 
     -- 幅拡張
-    local width = x + #colorArray[1]
+    local width = x + w
     if width > #self.colorArray[1] then
         for v, line in ipairs(self.colorArray) do
             while width >= #line do
@@ -74,6 +76,8 @@ end
 function Stage:score()
     local lines = {}
 
+    print(self.width, self.height)
+
     for v, line in ipairs(self.colorArray) do
         local valid = 0
         for h, color in ipairs(line) do
@@ -82,7 +86,6 @@ function Stage:score()
             end
         end
         if valid > 0 and valid == #line then
-            print(v, #line)
             table.insert(lines, v)
         end
     end
