@@ -28,11 +28,72 @@ function Stage:draw()
     Tetrimino.draw(self)
 end
 
+-- ブロックの当たり判定
+function Stage:hit(xOrTetrimino, y, colorArray)
+    local x, y = 0, 0
+
+    -- 最初の引数がテーブルなら Tetrimino クラスとして見做す
+    if type(xOrTetrimino) == 'table' then
+        x, y = xOrTetrimino:toBlockDimensions()
+        colorArray = xOrTetrimino.colorArray
+    else
+        x = x or 0
+        y = y or 0
+        if colorArray == nil then return false end
+    end
+
+    -- マイナス方向にはみ出したので当たり扱い
+    if x < 0 then return true end
+    if y < 0 then return true end
+
+    -- 当たりフラグ
+    local isHit = false
+
+    -- 配列のサイズ
+    local width, height = Tetrimino.getArrayDimensions(colorArray, true)
+    local right, bottom = width + x, height + y
+
+    -- 外にはみ出していたら当たり扱い
+    if right > self.width or bottom > self.height then
+        print('hit-over', right, self.width, bottom, self.height)
+        return true
+    end
+
+    for v, line in ipairs(self.colorArray) do
+        for h, color in ipairs(line) do
+            local tx, ty = h - 1, v - 1
+            if (tx >= x) and (ty >= y) and (tx < right) and (ty < bottom) then
+                local i, j = tx - x + 1, ty - y + 1
+                if colorArray[j][i] and line[h] then
+                    isHit = true
+                    break
+                end
+            end
+        end
+        if isHit then
+            break
+        end
+    end
+
+    return isHit
+end
+
 -- ブロックのマージ
-function Stage:merge(x, y, colorArray)
-    x = x or 0
-    y = y or 0
-    if colorArray == nil then return false end
+function Stage:merge(xOrTetrimino, y, colorArray)
+    local x, y = 0, 0
+
+    -- 最初の引数がテーブルなら Tetrimino クラスとして見做す
+    if type(xOrTetrimino) == 'table' then
+        x, y = xOrTetrimino:toBlockDimensions()
+        colorArray = xOrTetrimino.colorArray
+    else
+        x = x or 0
+        y = y or 0
+        if colorArray == nil then return false end
+    end
+
+    -- マイナス方向にはみ出していたら失敗
+    -- TODO: マージできるようにする
     if x < 0 then return false end
     if y < 0 then return false end
 

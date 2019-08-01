@@ -236,4 +236,14 @@ function Tetrimino:getDimensions()
     return self.blockWidth * self.width * self.scale, self.blockHeight * self.height * self.scale
 end
 
+-- ブロック座標に変換
+function Tetrimino:toBlockDimensions(x, y)
+    return math.floor((x or self.x) / self.blockWidth), math.floor((y or self.y) / self.blockHeight)
+end
+
+-- ピクセル座標に変換
+function Tetrimino:toPixelDimensions(x, y)
+    return x * self.blockWidth, y * self.blockHeight
+end
+
 return Tetrimino
