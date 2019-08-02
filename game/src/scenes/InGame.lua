@@ -24,68 +24,33 @@ function InGame:initialize(t)
 
     self.manager = EntityManager()
 
-    self.stage = self.manager:add(Stage{
-        spriteSheet = self.spriteSheetTiles,
-        x = 0, y = 0,
-        rotation = 0,
-        scale = 0.25,
-        colorArray = Tetrimino.makeArray(10, 20)
-    })
-    do
-        local t = { Tetrimino.makeLine(self.stage.width, 'grey') }
-        self.stage:merge(0, 14, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.I, 'grey')
-        self.stage:merge(0, 16, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.O, 'yellow')
-        self.stage:merge(8, 18, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.S, 'green')
-        self.stage:merge(1, 18, t)
-        self.stage:merge(5, 15, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.Z, 'red')
-        self.stage:merge(7, 16, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.J, 'blue')
-        self.stage:merge(0, 15, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.L, 'orange')
-        self.stage:merge(7, 12, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.T, 'pink')
-        self.stage:merge(6, 11, t)
-    end
-    do
-        local spriteSheet = self.spriteSheetTiles
-        local startX, startY = self.width / 3, 0
-        local scale = 0.25
-        local color = 'pink'
-        local x, y = startX, startY
-        for _, array in ipairs(Tetrimino.arrayNames) do
-            local base = self.manager:add(Tetrimino{
-                spriteSheet = spriteSheet, x = x, y = y, scale = scale, array = array
-            })
-            local w, h = base:getDimensions()
-            x = x + w + 8
-            for i = 1, 4 do
-                local t = self.manager:add(Tetrimino{
-                    spriteSheet = spriteSheet,
-                    x = x, y = y,
-                    scale = scale, array = array
-                })
-                t:rotate(i, 'black')
-                x = x + w + 8
+    local scale = 0.25
+    self.stage = self.manager:add(
+        Stage {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = scale,
+            colorArray = Tetrimino.makeArray(10, 20)
+        }
+    )
+    for _, array in ipairs(Tetrimino.arrayNames) do
+        local t = self.manager:add(
+            Tetrimino {
+                spriteSheet = self.spriteSheetTiles,
+                x = 0, y = 0,
+                scale = scale,
+                array = array
+            }
+        )
+        for i = 1, self.stage.height do
+            if self.stage:hit(t) then
+                print('hit', i)
+                t.y = t.y - t.blockHeight
+                self.stage:merge(t)
+                self.manager:remove(t)
+                break
             end
-            x, y = startX, y + h + 8
+            t.y = t.y + t.blockHeight
         end
     end
 end
