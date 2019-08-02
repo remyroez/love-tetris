@@ -37,7 +37,7 @@ function Stage:hit(xOrTetrimino, y, colorArray)
         x, y = xOrTetrimino:toBlockDimensions()
         colorArray = xOrTetrimino.colorArray
     else
-        x = x or 0
+        x = xOrTetrimino or 0
         y = y or 0
         if colorArray == nil then return false end
     end
@@ -55,7 +55,6 @@ function Stage:hit(xOrTetrimino, y, colorArray)
 
     -- 外にはみ出していたら当たり扱い
     if right > self.width or bottom > self.height then
-        print('hit-over', right, self.width, bottom, self.height)
         return true
     end
 
@@ -87,7 +86,7 @@ function Stage:merge(xOrTetrimino, y, colorArray)
         x, y = xOrTetrimino:toBlockDimensions()
         colorArray = xOrTetrimino.colorArray
     else
-        x = x or 0
+        x = xOrTetrimino or 0
         y = y or 0
         if colorArray == nil then return false end
     end
@@ -136,8 +135,6 @@ end
 -- スコア計算
 function Stage:score()
     local lines = {}
-
-    print(self.width, self.height)
 
     for v, line in ipairs(self.colorArray) do
         local valid = 0
