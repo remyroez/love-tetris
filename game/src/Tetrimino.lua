@@ -149,24 +149,24 @@ function Tetrimino.static.getArrayDimensions(array, fullcheck)
         return (array[1] == nil and 0 or #array[1]), (array == nil and 0 or #array)
     end
 
-    local w, h = 0, 0
+    local width, height = 0, 0
 
     for v, line in ipairs(array) do
         local count = 0
         for h, color in ipairs(line) do
             if color then
+                if h > width then
+                    width = h
+                end
                 count = count + 1
             end
         end
-        if count > w then
-            w = count
-        end
         if count > 0 then
-            h = v
+            height = v
         end
     end
 
-    return w, h
+    return width, height
 end
 
 -- 初期化
