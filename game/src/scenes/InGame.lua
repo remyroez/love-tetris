@@ -13,6 +13,12 @@ local EntityManager = require 'EntityManager'
 local Tetrimino = require 'Tetrimino'
 local Stage = require 'Stage'
 
+local function randomSelect(array)
+    return array[love.math.random(#array)]
+end
+
+local baseScale = 0.25
+
 -- 初期化
 function InGame:initialize(t)
     Entity.initialize(self)
@@ -24,35 +30,25 @@ function InGame:initialize(t)
 
     self.manager = EntityManager()
 
-    local scale = 0.25
     self.stage = self.manager:add(
         Stage {
             spriteSheet = self.spriteSheetTiles,
             x = 0, y = 0,
-            scale = scale,
+            scale = baseScale,
             colorArray = Tetrimino.makeArray(10, 20)
         }
     )
-    for _, array in ipairs(Tetrimino.arrayNames) do
-        local t = self.manager:add(
-            Tetrimino {
-                spriteSheet = self.spriteSheetTiles,
-                x = 0, y = 0,
-                scale = scale,
-                array = array
-            }
-        )
-        for i = 1, self.stage.height do
-            if self.stage:hit(t) then
-                print('hit', i)
-                t.y = t.y - t.blockHeight
-                self.stage:merge(t)
-                self.manager:remove(t)
-                break
-            end
-            t.y = t.y + t.blockHeight
-        end
-    end
+
+    self.currentTetrimino = self.manager:add(
+        Tetrimino {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = baseScale,
+            array = randomSelect(Tetrimino.arrayNames)
+        }
+    )
+
+    self.speed = 100
 end
 
 -- 破棄
@@ -64,6 +60,29 @@ end
 -- 更新
 function InGame:update(dt)
     self.manager:update(dt)
+    self:hitcheckCurrentTetrimino()
+    if self.currentTetrimino then
+        self.currentTetrimino.y = self.currentTetrimino.y + dt * self.speed
+    end
+end
+
+-- 現在のテトリミノの当たり判定
+function InGame:hitcheckCurrentTetrimino()
+    local t = self.currentTetrimino
+    if self.stage:hit(t) then
+        t.y = t.y - t.blockHeight * t.scale
+        self.stage:merge(t)
+        self.stage:score()
+        self.manager:remove(t)
+        self.currentTetrimino = self.manager:add(
+            Tetrimino {
+                spriteSheet = self.spriteSheetTiles,
+                x = 0, y = 0,
+                scale = baseScale,
+                array = randomSelect(Tetrimino.arrayNames)
+            }
+        )
+    end
 end
 
 -- 描画

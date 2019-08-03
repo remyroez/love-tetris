@@ -238,12 +238,12 @@ end
 
 -- ブロック座標に変換
 function Tetrimino:toBlockDimensions(x, y)
-    return math.floor((x or self.x) / self.blockWidth), math.floor((y or self.y) / self.blockHeight)
+    return math.ceil((x or self.x) / (self.blockWidth * self.scale)), math.ceil((y or self.y) / (self.blockHeight * self.scale))
 end
 
 -- ピクセル座標に変換
 function Tetrimino:toPixelDimensions(x, y)
-    return x * self.blockWidth, y * self.blockHeight
+    return x * self.blockWidth * self.scale, y * self.blockHeight * self.scale
 end
 
 return Tetrimino
