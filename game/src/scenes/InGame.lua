@@ -95,6 +95,18 @@ end
 function InGame:keypressed(key, scancode, isrepeat)
     if key == 'space' then
         print(self.stage:score())
+    elseif key == 'left' then
+        local x = self.currentTetrimino.x
+        self.currentTetrimino:move(-1)
+        if self.stage:hit(self.currentTetrimino) then
+            self.currentTetrimino.x = x
+        end
+    elseif key == 'right' then
+        local x = self.currentTetrimino.x
+        self.currentTetrimino:move(1)
+        if self.stage:hit(self.currentTetrimino) then
+            self.currentTetrimino.x = x
+        end
     end
 end
 

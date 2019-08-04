@@ -246,4 +246,13 @@ function Tetrimino:toPixelDimensions(x, y)
     return x * self.blockWidth * self.scale, y * self.blockHeight * self.scale
 end
 
+-- ブロック単位で移動
+function Tetrimino:move(x, y)
+    x = x or 0
+    y = y or 0
+    x, y = self:toPixelDimensions(x, y)
+    self.x = self.x + x
+    self.y = self.y + y
+end
+
 return Tetrimino
