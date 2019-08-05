@@ -185,6 +185,7 @@ function Tetrimino:initialize(t)
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
     self.width, self.height = Tetrimino.getArrayDimensions(self.colorArray)
+    self.swidth, self.sheight = Tetrimino.getArrayDimensions(self.colorArray, true)
 end
 
 -- 破棄
@@ -236,6 +237,11 @@ function Tetrimino:getDimensions()
     return self.blockWidth * self.width * self.scale, self.blockHeight * self.height * self.scale
 end
 
+-- 厳密なサイズ
+function Tetrimino:getStrictDimensions()
+    return self.blockWidth * self.swidth * self.scale, self.blockHeight * self.sheight * self.scale
+end
+
 -- ブロック座標に変換
 function Tetrimino:toBlockDimensions(x, y)
     return math.ceil((x or self.x) / (self.blockWidth * self.scale)), math.ceil((y or self.y) / (self.blockHeight * self.scale))
@@ -244,6 +250,11 @@ end
 -- ピクセル座標に変換
 function Tetrimino:toPixelDimensions(x, y)
     return x * self.blockWidth * self.scale, y * self.blockHeight * self.scale
+end
+
+-- ブロック座標に移動
+function Tetrimino:resetToBlockDimensions()
+    self.x, self.y = self:toPixelDimensions(self:toBlockDimensions())
 end
 
 -- ブロック単位で移動

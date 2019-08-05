@@ -28,9 +28,15 @@ function Stage:draw()
     Tetrimino.draw(self)
 end
 
+-- クリア
+function Stage:clear()
+    self.colorArray = Tetrimino.makeArray(self.width, self.height)
+end
+
 -- ブロックの当たり判定
 function Stage:hit(xOrTetrimino, y, colorArray)
     local x, y = 0, 0
+    local result = {}
 
     -- 最初の引数がテーブルなら Tetrimino クラスとして見做す
     if type(xOrTetrimino) == 'table' then
@@ -43,8 +49,8 @@ function Stage:hit(xOrTetrimino, y, colorArray)
     end
 
     -- マイナス方向にはみ出したので当たり扱い
-    if x < 0 then return true end
-    if y < 0 then return true end
+    if x < 0 then table.insert(result, 'left') end
+    if y < 0 then table.insert(result, 'top') end
 
     -- 当たりフラグ
     local isHit = false
@@ -54,8 +60,15 @@ function Stage:hit(xOrTetrimino, y, colorArray)
     local right, bottom = width + x, height + y
 
     -- 外にはみ出していたら当たり扱い
-    if right > self.width or bottom > self.height then
-        return true
+    if right > self.width then
+        table.insert(result, 'right')
+    end
+    if bottom > self.height then
+        table.insert(result, 'bottom')
+    end
+
+    if #result > 0 then
+        return result
     end
 
     for v, line in ipairs(self.colorArray) do
@@ -64,6 +77,7 @@ function Stage:hit(xOrTetrimino, y, colorArray)
             if (tx >= x) and (ty >= y) and (tx < right) and (ty < bottom) then
                 local i, j = tx - x + 1, ty - y + 1
                 if colorArray[j][i] and line[h] then
+                    table.insert(result, 'hit')
                     isHit = true
                     break
                 end
@@ -74,7 +88,7 @@ function Stage:hit(xOrTetrimino, y, colorArray)
         end
     end
 
-    return isHit
+    return #result > 0 and result or nil
 end
 
 -- ブロックのマージ
