@@ -169,6 +169,28 @@ function Tetrimino.static.getArrayDimensions(array, fullcheck)
     return width, height
 end
 
+-- 配列の矩形の取得
+function Tetrimino.static.getArrayRect(array)
+    local right, bottom = Tetrimino.getArrayDimensions(array, true)
+    local left, top = Tetrimino.getArrayDimensions(array)
+
+    for v, line in ipairs(array) do
+        for h, color in ipairs(line) do
+            if color then
+                if h < left then
+                    left = h
+                end
+                if v < top then
+                    top = v
+                end
+                break
+            end
+        end
+    end
+
+    return left, top, right, bottom
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
