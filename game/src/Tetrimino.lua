@@ -206,8 +206,7 @@ function Tetrimino:initialize(t)
     local color = t.color or Tetrimino.arrayColors[array] or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
-    self.width, self.height = Tetrimino.getArrayDimensions(self.colorArray)
-    self.swidth, self.sheight = Tetrimino.getArrayDimensions(self.colorArray, true)
+    self:refresh()
 end
 
 -- 破棄
@@ -252,6 +251,14 @@ function Tetrimino:rotate(n, newcolor)
     for i = 1, n do
         self.colorArray = Tetrimino.rotateArray(self.colorArray, newcolor)
     end
+    self:refresh()
+end
+
+-- ブロックの更新
+function Tetrimino:refresh()
+    self.width, self.height = Tetrimino.getArrayDimensions(self.colorArray)
+    self.left, self.top, self.right, self.bottom = Tetrimino.getArrayRect(self.colorArray)
+    self.swidth, self.sheight = self.right - self.left + 1, self.bottom - self.top + 1
 end
 
 -- サイズ
@@ -262,6 +269,16 @@ end
 -- 厳密なサイズ
 function Tetrimino:getStrictDimensions()
     return self.blockWidth * self.swidth * self.scale, self.blockHeight * self.sheight * self.scale
+end
+
+-- ブロックのサイズ
+function Tetrimino:getBlockDimensions()
+    return self.blockWidth * self.scale, self.blockHeight * self.scale
+end
+
+-- サイズ
+function Tetrimino:getRect()
+    return self.blockWidth * (self.left - 1) * self.scale, self.blockHeight * (self.top - 1) * self.scale, self.blockWidth * self.right * self.scale, self.blockHeight * self.bottom * self.scale
 end
 
 -- ブロック座標に変換

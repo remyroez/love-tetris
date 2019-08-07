@@ -48,7 +48,8 @@ function InGame:initialize(t)
         }
     )
 
-    self.speed = 100
+    self.speed = 1 / 10
+    self.timer = self.speed
 end
 
 -- 破棄
@@ -60,28 +61,7 @@ end
 -- 更新
 function InGame:update(dt)
     self.manager:update(dt)
-    if self.currentTetrimino then
-        self.currentTetrimino.y = self.currentTetrimino.y + dt * self.speed
-        self:hitcheckCurrentTetrimino()
-    end
-end
-
--- 現在のテトリミノの当たり判定
-function InGame:hitcheckCurrentTetrimino()
-    local t = self.currentTetrimino
-    if self:fixTetriminoPosition() then
-        self.stage:merge(t)
-        self.stage:score()
-        self.manager:remove(t)
-        self.currentTetrimino = self.manager:add(
-            Tetrimino {
-                spriteSheet = self.spriteSheetTiles,
-                x = 0, y = 0,
-                scale = baseScale,
-                array = randomSelect(Tetrimino.arrayNames)
-            }
-        )
-    end
+    self:updateTetrimino(dt)
 end
 
 -- 描画
@@ -95,40 +75,48 @@ function InGame:keypressed(key, scancode, isrepeat)
     if key == 'space' then
         self.currentTetrimino:rotate()
     elseif key == 'left' then
-        self.currentTetrimino:move(-1)
-        self:fixTetriminoPosition()
+        self:moveTetrimino(-1)
     elseif key == 'right' then
-        self.currentTetrimino:move(1)
-        self:fixTetriminoPosition()
+        self:moveTetrimino(1)
     end
 end
 
--- 描画
-function InGame:fixTetriminoPosition(t)
-    t = t or self.currentTetrimino
-    --t:resetToBlockDimensions()
-    local hitResult = self.stage:hit(t)
-    local hit = false
-    while hitResult do
-        hit = true
-        if lume.find(hitResult, 'hit') then
-            t:resetToBlockDimensions()
-            t:move(0, -1)
-        elseif lume.find(hitResult, 'bottom') then
-            t:resetToBlockDimensions()
-            t:move(0, -1)
-        elseif lume.find(hitResult, 'top') then
-            break
-        elseif lume.find(hitResult, 'left') then
-            t.x = 0
-        elseif lume.find(hitResult, 'right') then
-            local w, h = self.stage:getDimensions()
-            local tw, th = t:getStrictDimensions()
-            t.x = w - tw
-        else
-            break
+-- 現在のテトリミノの更新
+function InGame:updateTetrimino(dt)
+    -- タイマーのカウントダウン
+    self.timer = self.timer - dt
+    if self.timer < 0 then
+        -- タイマーのリセット
+        self.timer = self.timer + self.speed
+
+        -- 下に移動
+        if self:moveTetrimino(0, 1) then
+            -- 接触したのでステージに積む
+            local t = self.currentTetrimino
+            self.stage:merge(t)
+            self.stage:score()
+            self.manager:remove(t)
+            self.currentTetrimino = self.manager:add(
+                Tetrimino {
+                    spriteSheet = self.spriteSheetTiles,
+                    x = 0, y = 0,
+                    scale = baseScale,
+                    array = randomSelect(Tetrimino.arrayNames)
+                }
+            )
         end
-        hitResult = self.stage:hit(t)
+    end
+end
+
+-- テトリミノの移動
+function InGame:moveTetrimino(x, y)
+    local hit = false
+    local t = self.currentTetrimino
+    local tx, ty = t.x, t.y
+    t:move(x, y)
+    if self.stage:hit(t) then
+        t.x, t.y = tx, ty
+        hit = true
     end
     return hit
 end

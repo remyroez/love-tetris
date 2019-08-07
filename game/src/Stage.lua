@@ -35,7 +35,7 @@ end
 
 -- ブロックの当たり判定
 function Stage:hit(xOrTetrimino, y, colorArray)
-    local x, y = 0, 0
+    local x = 0
     local result = {}
 
     -- 最初の引数がテーブルなら Tetrimino クラスとして見做す
@@ -48,34 +48,29 @@ function Stage:hit(xOrTetrimino, y, colorArray)
         if colorArray == nil then return false end
     end
 
-    -- マイナス方向にはみ出したので当たり扱い
-    if x < 0 then table.insert(result, 'left') end
-    if y < 0 then table.insert(result, 'top') end
-
-    -- 当たりフラグ
-    local isHit = false
-
     -- 配列のサイズ
-    local width, height = Tetrimino.getArrayDimensions(colorArray, true)
-    local right, bottom = width + x, height + y
+    local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)
+    left, top = left - 1 + x, top - 1 + y
+    right, bottom = right + x, bottom + y
 
-    -- 外にはみ出していたら当たり扱い
-    if right > self.width then
-        table.insert(result, 'right')
-    end
-    if bottom > self.height then
-        table.insert(result, 'bottom')
-    end
+    -- はみ出していたら当たり扱い
+    if left < 0 then table.insert(result, 'left') end
+    if top < 0 then table.insert(result, 'top') end
+    if right > self.width then table.insert(result, 'right') end
+    if bottom > self.height then table.insert(result, 'bottom') end
 
     if #result > 0 then
         return result
     end
 
+    -- 当たりフラグ
+    local isHit = false
+
     for v, line in ipairs(self.colorArray) do
         for h, color in ipairs(line) do
             local tx, ty = h - 1, v - 1
-            if (tx >= x) and (ty >= y) and (tx < right) and (ty < bottom) then
-                local i, j = tx - x + 1, ty - y + 1
+            if (tx >= left) and (ty >= top) and (tx < right) and (ty < bottom) then
+                local i, j = tx - left + 1, ty - top + 1
                 if colorArray[j][i] and line[h] then
                     table.insert(result, 'hit')
                     isHit = true
@@ -93,7 +88,7 @@ end
 
 -- ブロックのマージ
 function Stage:merge(xOrTetrimino, y, colorArray)
-    local x, y = 0, 0
+    local x = 0
 
     -- 最初の引数がテーブルなら Tetrimino クラスとして見做す
     if type(xOrTetrimino) == 'table' then
@@ -105,15 +100,17 @@ function Stage:merge(xOrTetrimino, y, colorArray)
         if colorArray == nil then return false end
     end
 
-    -- マイナス方向にはみ出していたら失敗
-    -- TODO: マージできるようにする
-    if x < 0 then return false end
-    if y < 0 then return false end
+    -- 配列のサイズ
+    local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)
+    left, top = left - 1 + x, top - 1 + y
+    right, bottom = right + x, bottom + y
 
-    local w, h = Tetrimino.getArrayDimensions(colorArray, true)
+    -- マイナス方向にはみ出していたら失敗
+    if left < 0 then return false end
+    if top < 0 then return false end
 
     -- 高さ拡張
-    local height = y + h
+    local height = right
     if height > #self.colorArray then
         while height >= #self.colorArray do
             table.insert(self.colorArray, {})
@@ -121,7 +118,7 @@ function Stage:merge(xOrTetrimino, y, colorArray)
     end
 
     -- 幅拡張
-    local width = x + w
+    local width = bottom
     if width > #self.colorArray[1] then
         for v, line in ipairs(self.colorArray) do
             while width >= #line do
@@ -134,9 +131,13 @@ function Stage:merge(xOrTetrimino, y, colorArray)
     for v, line in ipairs(self.colorArray) do
         for h, color in ipairs(line) do
             local tx, ty = h - 1, v - 1
-            if (tx >= x) and (ty >= y) and (tx < width) and (ty < height) then
-                local i, j = tx - x + 1, ty - y + 1
-                if colorArray[j][i] then
+            if (tx >= left) and (ty >= top) and (tx < right) and (ty < bottom) then
+                local i, j = tx - left + 1, ty - top + 1
+                if colorArray[j] == nil then
+                    print('j', j)
+                elseif colorArray[j][i] == nil then
+                    print('j', j, 'i', i)
+                elseif colorArray[j][i] then
                     line[h] = colorArray[j][i]
                 end
             end
