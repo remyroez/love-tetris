@@ -50,12 +50,13 @@ function Stage:hit(xOrTetrimino, y, colorArray)
 
     -- 配列のサイズ
     local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)
-    left, top = left - 1 + x, top - 1 + y
+    local bleft, btop = left, top
+    left, top = left + x, top + y
     right, bottom = right + x, bottom + y
 
     -- はみ出していたら当たり扱い
-    if left < 0 then table.insert(result, 'left') end
-    if top < 0 then table.insert(result, 'top') end
+    if left < 1 then table.insert(result, 'left') end
+    if top < 1 then table.insert(result, 'top') end
     if right > self.width then table.insert(result, 'right') end
     if bottom > self.height then table.insert(result, 'bottom') end
 
@@ -68,9 +69,9 @@ function Stage:hit(xOrTetrimino, y, colorArray)
 
     for v, line in ipairs(self.colorArray) do
         for h, color in ipairs(line) do
-            local tx, ty = h - 1, v - 1
-            if (tx >= left) and (ty >= top) and (tx < right) and (ty < bottom) then
-                local i, j = tx - left + 1, ty - top + 1
+            local tx, ty = h, v
+            if (tx >= left) and (ty >= top) and (tx <= right) and (ty <= bottom) then
+                local i, j = tx - left + bleft, ty - top + btop
                 if colorArray[j][i] and line[h] then
                     table.insert(result, 'hit')
                     isHit = true
@@ -102,12 +103,13 @@ function Stage:merge(xOrTetrimino, y, colorArray)
 
     -- 配列のサイズ
     local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)
-    left, top = left - 1 + x, top - 1 + y
+    local bleft, btop = left, top
+    left, top = left + x, top + y
     right, bottom = right + x, bottom + y
 
     -- マイナス方向にはみ出していたら失敗
-    if left < 0 then return false end
-    if top < 0 then return false end
+    if left < 1 then return false end
+    if top < 1 then return false end
 
     -- 高さ拡張
     local height = right
@@ -130,9 +132,8 @@ function Stage:merge(xOrTetrimino, y, colorArray)
     -- マージ
     for v, line in ipairs(self.colorArray) do
         for h, color in ipairs(line) do
-            local tx, ty = h - 1, v - 1
-            if (tx >= left) and (ty >= top) and (tx < right) and (ty < bottom) then
-                local i, j = tx - left + 1, ty - top + 1
+            if (h >= left) and (v >= top) and (h <= right) and (v <= bottom) then
+                local i, j = h - left + bleft, v - top + btop
                 if colorArray[j] == nil then
                     print('j', j)
                 elseif colorArray[j][i] == nil then

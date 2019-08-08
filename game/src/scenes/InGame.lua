@@ -39,14 +39,7 @@ function InGame:initialize(t)
         }
     )
 
-    self.currentTetrimino = self.manager:add(
-        Tetrimino {
-            spriteSheet = self.spriteSheetTiles,
-            x = 0, y = 0,
-            scale = baseScale,
-            array = randomSelect(Tetrimino.arrayNames)
-        }
-    )
+    self:newTetrimino()
 
     self.speed = 1 / 10
     self.timer = self.speed
@@ -96,14 +89,7 @@ function InGame:updateTetrimino(dt)
             self.stage:merge(t)
             self.stage:score()
             self.manager:remove(t)
-            self.currentTetrimino = self.manager:add(
-                Tetrimino {
-                    spriteSheet = self.spriteSheetTiles,
-                    x = 0, y = 0,
-                    scale = baseScale,
-                    array = randomSelect(Tetrimino.arrayNames)
-                }
-            )
+            self:newTetrimino()
         end
     end
 end
@@ -119,6 +105,18 @@ function InGame:moveTetrimino(x, y)
         hit = true
     end
     return hit
+end
+
+-- テトリミノの生成
+function InGame:newTetrimino()
+    self.currentTetrimino = self.manager:add(
+        Tetrimino {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = baseScale,
+            array = randomSelect(Tetrimino.arrayNames)
+        }
+    )
 end
 
 return InGame
