@@ -248,6 +248,9 @@ end
 -- ブロックの回転
 function Tetrimino:rotate(n, newcolor)
     n = n or 1
+    if n < 0 then
+        n = 4 + n
+    end
     for i = 1, n do
         self.colorArray = Tetrimino.rotateArray(self.colorArray, newcolor)
     end

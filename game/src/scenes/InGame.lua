@@ -41,7 +41,7 @@ function InGame:initialize(t)
 
     self:newTetrimino()
 
-    self.speed = 1 / 10
+    self.speed = 1 / 2
     self.timer = self.speed
 end
 
@@ -67,6 +67,9 @@ end
 function InGame:keypressed(key, scancode, isrepeat)
     if key == 'space' then
         self.currentTetrimino:rotate()
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate(-1)
+        end
     elseif key == 'left' then
         self:moveTetrimino(-1)
     elseif key == 'right' then
@@ -114,9 +117,51 @@ function InGame:newTetrimino()
             spriteSheet = self.spriteSheetTiles,
             x = 0, y = 0,
             scale = baseScale,
-            array = randomSelect(Tetrimino.arrayNames)
+            array = 'I'--randomSelect(Tetrimino.arrayNames)
         }
     )
+end
+
+local fitcheck = {
+    { 0, 1 },
+    { 1, 1 },
+    { -1, 1 },
+    { 1, -1 },
+    { -1, -1 },
+    { 0, -1 },
+}
+
+-- テトリミノの生成
+function InGame:fitTetrimino()
+    local valid = true
+    local t = self.currentTetrimino
+    local hitresult = self.stage:hit(t)
+    while hitresult do
+        if lume.find(hitresult, 'left') then
+            t:move(1)
+        elseif lume.find(hitresult, 'right') then
+            t:move(-1)
+        elseif lume.find(hitresult, 'bottom') then
+            t:move(0, -1)
+        elseif lume.find(hitresult, 'hit') then
+            t:move(0, -1)
+            local ok = false
+            for _, pos in ipairs(fitcheck) do
+                if not self:moveTetrimino(unpack(pos)) then
+                    ok = true
+                    break
+                end
+            end
+            if not ok then
+                valid = false
+                break
+            end
+        else
+            break
+        end
+        hitresult = self.stage:hit(t)
+    end
+    return valid
 end
 
 return InGame
