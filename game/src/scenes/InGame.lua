@@ -65,22 +65,31 @@ end
 
 -- キー入力
 function InGame:keypressed(key, scancode, isrepeat)
-    if key == 'space' then
+    if key == 'space' or key == 'a' then
         self.currentTetrimino:rotate()
         if not self:fitTetrimino() then
             self.currentTetrimino:rotate(-1)
+        end
+    elseif key == 'd' then
+        self.currentTetrimino:rotate(-1)
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate()
         end
     elseif key == 'left' then
         self:moveTetrimino(-1)
     elseif key == 'right' then
         self:moveTetrimino(1)
+    elseif key == 'down' then
+        self:fallTetrimino()
     end
 end
 
 -- 現在のテトリミノの更新
 function InGame:updateTetrimino(dt)
+    local hit = false
+
     -- タイマーのカウントダウン
-    self.timer = self.timer - dt
+    self.timer = self.timer - (dt or self.speed)
     if self.timer < 0 then
         -- タイマーのリセット
         self.timer = self.timer + self.speed
@@ -93,8 +102,11 @@ function InGame:updateTetrimino(dt)
             self.stage:score()
             self.manager:remove(t)
             self:newTetrimino()
+            hit = true
         end
     end
+
+    return hit
 end
 
 -- テトリミノの移動
@@ -108,6 +120,13 @@ function InGame:moveTetrimino(x, y)
         hit = true
     end
     return hit
+end
+
+-- テトリミノの移動
+function InGame:fallTetrimino()
+    while not self:updateTetrimino() do
+    end
+    self.timer = self.speed
 end
 
 -- テトリミノの生成
@@ -126,9 +145,9 @@ local fitcheck = {
     { 0, 1 },
     { 1, 1 },
     { -1, 1 },
-    { 1, -1 },
-    { -1, -1 },
-    { 0, -1 },
+    --{ 0, -1 },
+    --{ 1, -1 },
+    --{ -1, -1 },
 }
 
 -- テトリミノの生成
@@ -144,7 +163,6 @@ function InGame:fitTetrimino()
         elseif lume.find(hitresult, 'bottom') then
             t:move(0, -1)
         elseif lume.find(hitresult, 'hit') then
-            t:move(0, -1)
             local ok = false
             for _, pos in ipairs(fitcheck) do
                 if not self:moveTetrimino(unpack(pos)) then
