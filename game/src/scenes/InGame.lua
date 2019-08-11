@@ -136,7 +136,7 @@ function InGame:newTetrimino()
             spriteSheet = self.spriteSheetTiles,
             x = 0, y = 0,
             scale = baseScale,
-            array = 'I'--randomSelect(Tetrimino.arrayNames)
+            array = randomSelect(Tetrimino.arrayNames)
         }
     )
 end

@@ -112,7 +112,7 @@ function Stage:merge(xOrTetrimino, y, colorArray)
     if top < 1 then return false end
 
     -- 高さ拡張
-    local height = right
+    local height = bottom
     if height > #self.colorArray then
         while height >= #self.colorArray do
             table.insert(self.colorArray, {})
@@ -120,7 +120,7 @@ function Stage:merge(xOrTetrimino, y, colorArray)
     end
 
     -- 幅拡張
-    local width = bottom
+    local width = right
     if width > #self.colorArray[1] then
         for v, line in ipairs(self.colorArray) do
             while width >= #line do
@@ -152,6 +152,7 @@ end
 function Stage:score()
     local lines = {}
 
+    -- 埋まっている行をリストアップ
     for v, line in ipairs(self.colorArray) do
         local valid = 0
         for h, color in ipairs(line) do
@@ -164,10 +165,12 @@ function Stage:score()
         end
     end
 
+    -- 埋まっている行を下から順に削除
     for i = 1, #lines do
         table.remove(self.colorArray, lines[#lines - i + 1])
     end
 
+    -- 空行を上から追加
     for i = 1, #lines do
         table.insert(self.colorArray, 1, Tetrimino.makeLine(self.width))
     end
