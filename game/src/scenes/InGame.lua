@@ -54,7 +54,10 @@ end
 -- 更新
 function InGame:update(dt)
     self.manager:update(dt)
-    self:updateTetrimino(dt)
+    if self:updateTetrimino(dt) and self.stage:hit(self.currentTetrimino) then
+        print('gameover')
+        self.stage:fill()
+    end
 end
 
 -- 描画
@@ -97,16 +100,20 @@ function InGame:updateTetrimino(dt)
         -- 下に移動
         if self:moveTetrimino(0, 1) then
             -- 接触したのでステージに積む
-            local t = self.currentTetrimino
-            self.stage:merge(t)
-            self.stage:score()
-            self.manager:remove(t)
-            self:newTetrimino()
+            self:mergeTetrimino()
             hit = true
         end
     end
 
     return hit
+end
+
+-- テトリミノのマージ
+function InGame:mergeTetrimino()
+    self.stage:merge(self.currentTetrimino)
+    self.stage:score()
+    self.manager:remove(self.currentTetrimino)
+    self:newTetrimino()
 end
 
 -- テトリミノの移動
@@ -131,10 +138,11 @@ end
 
 -- テトリミノの生成
 function InGame:newTetrimino()
+    local x, y = self.stage:toPixelDimensions(3, 0)
     self.currentTetrimino = self.manager:add(
         Tetrimino {
             spriteSheet = self.spriteSheetTiles,
-            x = 0, y = 0,
+            x = x, y = y,
             scale = baseScale,
             array = randomSelect(Tetrimino.arrayNames)
         }

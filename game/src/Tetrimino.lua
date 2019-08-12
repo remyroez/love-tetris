@@ -33,8 +33,10 @@ Tetrimino.static.arrays = {
         { false, false, false, false, },
     },
     O = {
-        { true, true, },
-        { true, true, },
+        { false, false, false, false, },
+        { false, true, true, false, },
+        { false, true, true, false, },
+        { false, false, false, false, },
     },
     S = {
         { false, true, true },
@@ -191,6 +193,18 @@ function Tetrimino.static.getArrayRect(array)
     return left, top, right, bottom
 end
 
+-- 配列の上書き
+function Tetrimino.static.fillArray(array, newcolor)
+    if newcolor == nil then
+        newcolor = false
+    end
+    for v, line in ipairs(array) do
+        for h, color in ipairs(line) do
+            line[h] = newcolor
+        end
+    end
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -255,6 +269,11 @@ function Tetrimino:rotate(n, newcolor)
         self.colorArray = Tetrimino.rotateArray(self.colorArray, newcolor)
     end
     self:refresh()
+end
+
+-- ブロックの上書き
+function Tetrimino:fill(newcolor)
+    Tetrimino.fillArray(self.colorArray, newcolor)
 end
 
 -- ブロックの更新
