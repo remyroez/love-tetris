@@ -11,6 +11,13 @@ local InGame = class('InGame', Entity)
 -- クラス
 local EntityManager = require 'EntityManager'
 local Tetrimino = require 'Tetrimino'
+local Stage = require 'Stage'
+
+local function randomSelect(array)
+    return array[love.math.random(#array)]
+end
+
+local baseScale = 0.25
 
 -- 初期化
 function InGame:initialize(t)
@@ -23,70 +30,19 @@ function InGame:initialize(t)
 
     self.manager = EntityManager()
 
-    self.stage = self.manager:add(Tetrimino{
-        spriteSheet = self.spriteSheetTiles,
-        x = 0, y = 0,
-        rotation = 0,
-        scale = 0.25,
-        colorArray = Tetrimino.makeArray(10, 20)
-    })
-    do
-        local t = { Tetrimino.makeLine(self.stage.width, 'grey') }
-        self.stage:merge(0, 14, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.I, 'grey')
-        self.stage:merge(0, 16, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.O, 'yellow')
-        self.stage:merge(8, 18, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.S, 'green')
-        self.stage:merge(1, 18, t)
-        self.stage:merge(5, 15, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.Z, 'red')
-        self.stage:merge(7, 16, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.J, 'blue')
-        self.stage:merge(0, 15, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.L, 'orange')
-        self.stage:merge(7, 12, t)
-    end
-    do
-        local t = Tetrimino.makeColorArray(Tetrimino.arrays.T, 'pink')
-        self.stage:merge(6, 11, t)
-    end
-    do
-        local spriteSheet = self.spriteSheetTiles
-        local startX, startY = self.width / 3, 0
-        local scale = 0.25
-        local color = 'pink'
-        local x, y = startX, startY
-        for _, array in ipairs(Tetrimino.arrayNames) do
-            local base = self.manager:add(Tetrimino{
-                spriteSheet = spriteSheet, x = x, y = y, scale = scale, array = array
-            })
-            local w, h = base:getDimensions()
-            x = x + w + 8
-            for i = 1, 4 do
-                local t = self.manager:add(Tetrimino{
-                    spriteSheet = spriteSheet,
-                    x = x, y = y,
-                    scale = scale, array = array
-                })
-                t:rotate(i, 'black')
-                x = x + w + 8
-            end
-            x, y = startX, y + h + 8
-        end
-    end
+    self.stage = self.manager:add(
+        Stage {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = baseScale,
+            colorArray = Tetrimino.makeArray(10, 20)
+        }
+    )
+
+    self:newTetrimino()
+
+    self.speed = 1 / 2
+    self.timer = self.speed
 end
 
 -- 破棄
@@ -98,6 +54,10 @@ end
 -- 更新
 function InGame:update(dt)
     self.manager:update(dt)
+    if self:updateTetrimino(dt) and self.stage:hit(self.currentTetrimino) then
+        print('gameover')
+        self.stage:fill()
+    end
 end
 
 -- 描画
@@ -108,9 +68,126 @@ end
 
 -- キー入力
 function InGame:keypressed(key, scancode, isrepeat)
-    if key == 'space' then
-        print(self.stage:score())
+    if key == 'space' or key == 'a' then
+        self.currentTetrimino:rotate()
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate(-1)
+        end
+    elseif key == 'd' then
+        self.currentTetrimino:rotate(-1)
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate()
+        end
+    elseif key == 'left' then
+        self:moveTetrimino(-1)
+    elseif key == 'right' then
+        self:moveTetrimino(1)
+    elseif key == 'down' then
+        self:fallTetrimino()
     end
+end
+
+-- 現在のテトリミノの更新
+function InGame:updateTetrimino(dt)
+    local hit = false
+
+    -- タイマーのカウントダウン
+    self.timer = self.timer - (dt or self.speed)
+    if self.timer < 0 then
+        -- タイマーのリセット
+        self.timer = self.timer + self.speed
+
+        -- 下に移動
+        if self:moveTetrimino(0, 1) then
+            -- 接触したのでステージに積む
+            self:mergeTetrimino()
+            hit = true
+        end
+    end
+
+    return hit
+end
+
+-- テトリミノのマージ
+function InGame:mergeTetrimino()
+    self.stage:merge(self.currentTetrimino)
+    self.stage:score()
+    self.manager:remove(self.currentTetrimino)
+    self:newTetrimino()
+end
+
+-- テトリミノの移動
+function InGame:moveTetrimino(x, y)
+    local hit = false
+    local t = self.currentTetrimino
+    local tx, ty = t.x, t.y
+    t:move(x, y)
+    if self.stage:hit(t) then
+        t.x, t.y = tx, ty
+        hit = true
+    end
+    return hit
+end
+
+-- テトリミノの移動
+function InGame:fallTetrimino()
+    while not self:updateTetrimino() do
+    end
+    self.timer = self.speed
+end
+
+-- テトリミノの生成
+function InGame:newTetrimino()
+    local x, y = self.stage:toPixelDimensions(3, 0)
+    self.currentTetrimino = self.manager:add(
+        Tetrimino {
+            spriteSheet = self.spriteSheetTiles,
+            x = x, y = y,
+            scale = baseScale,
+            array = randomSelect(Tetrimino.arrayNames)
+        }
+    )
+end
+
+local fitcheck = {
+    { 0, 1 },
+    { 1, 1 },
+    { -1, 1 },
+    --{ 0, -1 },
+    --{ 1, -1 },
+    --{ -1, -1 },
+}
+
+-- テトリミノの生成
+function InGame:fitTetrimino()
+    local valid = true
+    local t = self.currentTetrimino
+    local hitresult = self.stage:hit(t)
+    while hitresult do
+        if lume.find(hitresult, 'left') then
+            t:move(1)
+        elseif lume.find(hitresult, 'right') then
+            t:move(-1)
+        elseif lume.find(hitresult, 'bottom') then
+            t:move(0, -1)
+        elseif lume.find(hitresult, 'hit') then
+            local ok = false
+            for _, pos in ipairs(fitcheck) do
+                if not self:moveTetrimino(unpack(pos)) then
+                    ok = true
+                    break
+                end
+            end
+            if not ok then
+                valid = false
+                break
+            end
+        else
+            break
+        end
+        hitresult = self.stage:hit(t)
+    end
+    return valid
 end
 
 return InGame

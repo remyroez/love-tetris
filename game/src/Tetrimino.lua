@@ -33,8 +33,10 @@ Tetrimino.static.arrays = {
         { false, false, false, false, },
     },
     O = {
-        { true, true, },
-        { true, true, },
+        { false, false, false, false, },
+        { false, true, true, false, },
+        { false, true, true, false, },
+        { false, false, false, false, },
     },
     S = {
         { false, true, true },
@@ -142,6 +144,67 @@ function Tetrimino.static.rotateArray(array, newcolor)
     return newArray
 end
 
+-- 配列の次元の取得
+function Tetrimino.static.getArrayDimensions(array, fullcheck)
+    array = array or {}
+    if not fullcheck then
+        return (array[1] == nil and 0 or #array[1]), (array == nil and 0 or #array)
+    end
+
+    local width, height = 0, 0
+
+    for v, line in ipairs(array) do
+        local count = 0
+        for h, color in ipairs(line) do
+            if color then
+                if h > width then
+                    width = h
+                end
+                count = count + 1
+            end
+        end
+        if count > 0 then
+            height = v
+        end
+    end
+
+    return width, height
+end
+
+-- 配列の矩形の取得
+function Tetrimino.static.getArrayRect(array)
+    local right, bottom = Tetrimino.getArrayDimensions(array, true)
+    local left, top = Tetrimino.getArrayDimensions(array)
+
+    for v, line in ipairs(array) do
+        for h, color in ipairs(line) do
+            if color then
+                if h < left then
+                    left = h
+                end
+                if v < top then
+                    top = v
+                end
+                break
+            end
+        end
+    end
+
+    return left, top, right, bottom
+end
+
+-- 配列の上書き
+function Tetrimino.static.fillArray(array, newcolor)
+    if newcolor == nil then
+        newcolor = false
+    end
+    for v, line in ipairs(array) do
+        for h, color in ipairs(line) do
+            line[h] = newcolor
+        end
+    end
+end
+
 -- 初期化
 function Tetrimino:initialize(t)
     Entity.initialize(self)
@@ -157,8 +220,7 @@ function Tetrimino:initialize(t)
     local color = t.color or Tetrimino.arrayColors[array] or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
-    self.width = self.colorArray[1] == nil and 0 or #self.colorArray[1]
-    self.height = self.colorArray == nil and 0 or #self.colorArray
+    self:refresh()
 end
 
 -- 破棄
@@ -200,83 +262,69 @@ end
 -- ブロックの回転
 function Tetrimino:rotate(n, newcolor)
     n = n or 1
+    if n < 0 then
+        n = 4 + n
+    end
     for i = 1, n do
         self.colorArray = Tetrimino.rotateArray(self.colorArray, newcolor)
     end
+    self:refresh()
 end
 
--- ブロックのマージ
-function Tetrimino:merge(x, y, colorArray)
-    x = x or 0
-    y = y or 0
-    if colorArray == nil then return false end
-    if x < 0 then return false end
-    if y < 0 then return false end
-
-    -- 高さ拡張
-    local height = y + #colorArray
-    if height > #self.colorArray then
-        while height >= #self.colorArray do
-            table.insert(self.colorArray, {})
-        end
-    end
-
-    -- 幅拡張
-    local width = x + #colorArray[1]
-    if width > #self.colorArray[1] then
-        for v, line in ipairs(self.colorArray) do
-            while width >= #line do
-                table.insert(line, false)
-            end
-        end
-    end
-
-    -- マージ
-    for v, line in ipairs(self.colorArray) do
-        for h, color in ipairs(line) do
-            local tx, ty = h - 1, v - 1
-            if (tx >= x) and (ty >= y) and (tx < width) and (ty < height) then
-                local i, j = tx - x + 1, ty - y + 1
-                if colorArray[j][i] then
-                    line[h] = colorArray[j][i]
-                end
-            end
-        end
-    end
-
-    return true
+-- ブロックの上書き
+function Tetrimino:fill(newcolor)
+    Tetrimino.fillArray(self.colorArray, newcolor)
 end
 
--- スコア計算
-function Tetrimino:score()
-    local lines = {}
-
-    for v, line in ipairs(self.colorArray) do
-        local valid = 0
-        for h, color in ipairs(line) do
-            if color then
-                valid = valid + 1
-            end
-        end
-        if valid == #line then
-            table.insert(lines, v)
-        end
-    end
-
-    for i = 1, #lines do
-        table.remove(self.colorArray, lines[#lines - i + 1])
-    end
-
-    for i = 1, #lines do
-        table.insert(self.colorArray, 1, Tetrimino.makeLine(self.width))
-    end
-
-    return #lines
+-- ブロックの更新
+function Tetrimino:refresh()
+    self.width, self.height = Tetrimino.getArrayDimensions(self.colorArray)
+    self.left, self.top, self.right, self.bottom = Tetrimino.getArrayRect(self.colorArray)
+    self.swidth, self.sheight = self.right - self.left + 1, self.bottom - self.top + 1
 end
 
 -- サイズ
 function Tetrimino:getDimensions()
     return self.blockWidth * self.width * self.scale, self.blockHeight * self.height * self.scale
+end
+
+-- 厳密なサイズ
+function Tetrimino:getStrictDimensions()
+    return self.blockWidth * self.swidth * self.scale, self.blockHeight * self.sheight * self.scale
+end
+
+-- ブロックのサイズ
+function Tetrimino:getBlockDimensions()
+    return self.blockWidth * self.scale, self.blockHeight * self.scale
+end
+
+-- サイズ
+function Tetrimino:getRect()
+    return self.blockWidth * (self.left - 1) * self.scale, self.blockHeight * (self.top - 1) * self.scale, self.blockWidth * self.right * self.scale, self.blockHeight * self.bottom * self.scale
+end
+
+-- ブロック座標に変換
+function Tetrimino:toBlockDimensions(x, y)
+    return math.ceil((x or self.x) / (self.blockWidth * self.scale)), math.ceil((y or self.y) / (self.blockHeight * self.scale))
+end
+
+-- ピクセル座標に変換
+function Tetrimino:toPixelDimensions(x, y)
+    return x * self.blockWidth * self.scale, y * self.blockHeight * self.scale
+end
+
+-- ブロック座標に移動
+function Tetrimino:resetToBlockDimensions()
+    self.x, self.y = self:toPixelDimensions(self:toBlockDimensions())
+end
+
+-- ブロック単位で移動
+function Tetrimino:move(x, y)
+    x = x or 0
+    y = y or 0
+    x, y = self:toPixelDimensions(x, y)
+    self.x = self.x + x
+    self.y = self.y + y
 end
 
 return Tetrimino
