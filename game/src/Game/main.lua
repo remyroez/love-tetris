@@ -7,7 +7,7 @@ local Game = require(folderOfThisFile .. 'class')
 -- クラス
 local Application = require 'Application'
 local EntityStack = require 'EntityStack'
-local InGame = require 'scenes.InGame'
+local Splash = require 'scenes.Splash'
 
 -- エイリアス
 local lg = love.graphics
@@ -30,11 +30,13 @@ function Game:load(...)
     self.spriteSheetTiles = sbss:new('assets/spritesheet_tiles.xml')
 
     self.scene = EntityStack()
-    self.scene:add(InGame{
-        width = self.width,
-        height = self.height,
-        spriteSheetTiles = self.spriteSheetTiles,
-        spriteSheetParticles = self.spriteSheetParticles,
+    self.scene:add(Splash{
+        args = {
+            width = self.width,
+            height = self.height,
+            spriteSheetTiles = self.spriteSheetTiles,
+            spriteSheetParticles = self.spriteSheetParticles,
+        },
     })
 end
 

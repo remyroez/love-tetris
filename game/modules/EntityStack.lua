@@ -26,4 +26,10 @@ function EntityStack:call(event, ...)
     end
 end
 
+-- 先頭のエンティティを入れ替える
+function EntityStack:swap(entity)
+    self:remove(self:top())
+    return self:add(entity)
+end
+
 return EntityStack
