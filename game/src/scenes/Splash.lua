@@ -13,14 +13,18 @@ local Splash = class('Splash', Entity)
 
 -- 次のステートへ
 function Splash:nextState(...)
-    self.parent:swap(InGame(self.args))
+    self.parent:swap(
+        InGame{
+            app = self.app,
+        }
+    )
 end
 
 -- 初期化
 function Splash:initialize(t)
     Entity.initialize(self)
 
-    self.args = t.args or {}
+    self.app = t.app or {}
 
     -- スプラッシュスクリーンの設定
     local config = t.config or {}

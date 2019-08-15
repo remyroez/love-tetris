@@ -23,10 +23,11 @@ local baseScale = 0.25
 function InGame:initialize(t)
     Entity.initialize(self)
 
-    self.width = t.width or 800
-    self.height = t.height or 600
-    self.spriteSheetTiles = t.spriteSheetTiles
-    self.spriteSheetParticles = t.spriteSheetParticles
+    self.app = t.app or {}
+    self.width = self.app.width or 800
+    self.height = self.app.height or 600
+    self.spriteSheetTiles = self.app.spriteSheetTiles
+    self.spriteSheetParticles = self.app.spriteSheetParticles
 
     self.manager = EntityManager()
 

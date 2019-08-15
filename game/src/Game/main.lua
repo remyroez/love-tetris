@@ -31,12 +31,7 @@ function Game:load(...)
 
     self.scene = EntityStack()
     self.scene:add(Splash{
-        args = {
-            width = self.width,
-            height = self.height,
-            spriteSheetTiles = self.spriteSheetTiles,
-            spriteSheetParticles = self.spriteSheetParticles,
-        },
+        app = self,
     })
 end
 
