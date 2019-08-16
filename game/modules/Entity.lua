@@ -20,4 +20,13 @@ end
 function Entity:draw()
 end
 
+-- ルート
+function Entity:root()
+    local e = self
+    while e.parent do
+        e = e.parent
+    end
+    return e
+end
+
 return Entity

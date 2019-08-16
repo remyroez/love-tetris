@@ -43,6 +43,7 @@ end
 function EntityManager:add(entity)
     table.insert(self.entities, entity)
     entity.parent = self
+    lume.call(entity.added, entity, self)
     return entity
 end
 

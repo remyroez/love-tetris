@@ -47,6 +47,11 @@ function InGame:initialize(t)
 end
 
 -- 破棄
+function InGame:added(parent)
+    print(self:root())
+end
+
+-- 破棄
 function InGame:destroy()
     self.manager:destroy()
     self.manager = nil
