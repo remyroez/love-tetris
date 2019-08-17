@@ -3,8 +3,6 @@ local class = require 'middleclass'
 local lume = require 'lume'
 local o_ten_one = require 'o-ten-one'
 
-local InGame = require 'scenes.InGame'
-
 -- 基底クラス
 local Entity = require 'Entity'
 
@@ -12,9 +10,9 @@ local Entity = require 'Entity'
 local Splash = class('Splash', Entity)
 
 -- 次のステートへ
-function Splash:nextState(...)
+function Splash:nextScene(...)
     self.parent:swap(
-        InGame{
+        require 'scenes.Title' {
             app = self.app,
         }
     )
@@ -33,7 +31,7 @@ function Splash:initialize(t)
     -- スプラッシュスクリーン
     self.splash = o_ten_one(config)
     self.splash.onDone = function ()
-        self:nextState()
+        self:nextScene()
     end
 end
 
