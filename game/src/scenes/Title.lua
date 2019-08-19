@@ -28,6 +28,8 @@ function Title:initialize(t)
     self.app = t.app or {}
     self.width = self.app.width or 800
     self.height = self.app.height or 600
+    self.font64 = self.app.font64
+    self.font32 = self.app.font32
 
     -- タイマー
     self.timer = Timer()
@@ -77,11 +79,11 @@ function Title:draw()
 
     -- タイトル
     lg.setColor(1, 1, 1, self.alpha)
-    lg.printf('TETRIS', 0, self.height * 0.3, self.width, 'center')
+    lg.printf('TETRIS', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
 
     -- キー入力表示
     if not self.busy and self.visiblePressAnyKey then
-        lg.printf('PRESS ANY KEY', 0, self.height * 0.7, self.width, 'center')
+        lg.printf('PRESS ANY KEY', self.font32, 0, self.height * 0.7 - self.font32:getHeight() * 0.5, self.width, 'center')
     end
 
     -- フェード
