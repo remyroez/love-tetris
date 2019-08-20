@@ -76,6 +76,8 @@ end
 
 -- 描画
 function Title:draw()
+    -- クリア
+    lg.clear(.42, .75, .89)
 
     -- タイトル
     lg.setColor(1, 1, 1, self.alpha)
