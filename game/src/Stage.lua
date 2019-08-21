@@ -47,6 +47,9 @@ function Stage:hit(xOrTetrimino, y, colorArray)
         y = y or 0
         if colorArray == nil then return false end
     end
+    local bx, by = self:toBlockDimensions()
+    x = x - bx
+    y = y - by
 
     -- 配列のサイズ
     local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)
@@ -100,6 +103,9 @@ function Stage:merge(xOrTetrimino, y, colorArray)
         y = y or 0
         if colorArray == nil then return false end
     end
+    local bx, by = self:toBlockDimensions()
+    x = x - bx
+    y = y - by
 
     -- 配列のサイズ
     local left, top, right, bottom = Tetrimino.getArrayRect(colorArray)

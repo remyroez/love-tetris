@@ -40,6 +40,10 @@ function InGame:initialize(t)
         }
     )
 
+    local w, h = self.stage:getDimensions()
+    self.stage.x = (self.width - w) * 0.5
+    self.stage.y = (self.height - h) * 0.5
+
     self:newTetrimino()
 
     self.speed = 1 / 2
@@ -68,7 +72,10 @@ end
 
 -- 描画
 function InGame:draw()
-    love.graphics.rectangle('line', 0, 0, self.stage:getDimensions())
+    -- クリア
+    love.graphics.clear(.42, .75, .89)
+
+    love.graphics.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
     self.manager:draw()
 end
 
@@ -145,6 +152,8 @@ end
 -- テトリミノの生成
 function InGame:newTetrimino()
     local x, y = self.stage:toPixelDimensions(3, 0)
+    x = x + self.stage.x
+    y = y + self.stage.y
     self.currentTetrimino = self.manager:add(
         Tetrimino {
             spriteSheet = self.spriteSheetTiles,
