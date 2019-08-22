@@ -2,11 +2,15 @@
 local class = require 'middleclass'
 local lume = require 'lume'
 
+-- エイリアス
+local lg = love.graphics
+
 -- 基底クラス
 local Entity = require 'Entity'
 
 -- インゲーム クラス
 local InGame = class('InGame', Entity)
+InGame:include(require 'stateful')
 
 -- クラス
 local EntityManager = require 'EntityManager'
@@ -28,6 +32,8 @@ function InGame:initialize(t)
     self.height = self.app.height or 600
     self.spriteSheetTiles = self.app.spriteSheetTiles
     self.spriteSheetParticles = self.app.spriteSheetParticles
+    self.font64 = self.app.font64
+    self.font32 = self.app.font32
 
     self.manager = EntityManager()
 
@@ -48,6 +54,8 @@ function InGame:initialize(t)
 
     self.speed = 1 / 2
     self.timer = self.speed
+
+    self:gotoState 'Start'
 end
 
 -- 破棄
@@ -63,41 +71,20 @@ end
 
 -- 更新
 function InGame:update(dt)
-    self.manager:update(dt)
-    if self:updateTetrimino(dt) and self.stage:hit(self.currentTetrimino) then
-        print('gameover')
-        self.stage:fill()
-    end
 end
 
 -- 描画
 function InGame:draw()
-    -- クリア
-    love.graphics.clear(.42, .75, .89)
-
-    love.graphics.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
-    self.manager:draw()
 end
 
 -- キー入力
 function InGame:keypressed(key, scancode, isrepeat)
-    if key == 'space' or key == 'a' then
-        self.currentTetrimino:rotate()
-        if not self:fitTetrimino() then
-            self.currentTetrimino:rotate(-1)
-        end
-    elseif key == 'd' then
-        self.currentTetrimino:rotate(-1)
-        if not self:fitTetrimino() then
-            self.currentTetrimino:rotate()
-        end
-    elseif key == 'left' then
-        self:moveTetrimino(-1)
-    elseif key == 'right' then
-        self:moveTetrimino(1)
-    elseif key == 'down' then
-        self:fallTetrimino()
-    end
+end
+
+-- 現在のテトリミノの更新
+function InGame:drawStage()
+    love.graphics.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
+    self.manager:draw()
 end
 
 -- 現在のテトリミノの更新
@@ -203,6 +190,100 @@ function InGame:fitTetrimino()
         hitresult = self.stage:hit(t)
     end
     return valid
+end
+
+-- スタート ステート
+local Start = InGame:addState 'Start'
+
+-- 更新
+function Start:update(dt)
+    self.manager:update(dt)
+end
+
+-- 描画
+function Start:draw()
+    -- クリア
+    love.graphics.clear(.42, .75, .89)
+
+    -- ステージ描画
+    self:drawStage()
+
+    -- タイトル
+    lg.setColor(1, 1, 1)
+    lg.printf('CHOOSE LEVEL', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+end
+
+-- キー入力
+function Start:keypressed(key, scancode, isrepeat)
+    self:gotoState 'Play'
+end
+
+-- プレイ ステート
+local Play = InGame:addState 'Play'
+
+-- 更新
+function Play:update(dt)
+    self.manager:update(dt)
+    if self:updateTetrimino(dt) and self.stage:hit(self.currentTetrimino) then
+        self:gotoState 'Gameover'
+    end
+end
+
+-- 描画
+function Play:draw()
+    -- クリア
+    love.graphics.clear(.42, .75, .89)
+
+    -- ステージ描画
+    self:drawStage()
+end
+
+-- キー入力
+function Play:keypressed(key, scancode, isrepeat)
+    if key == 'space' or key == 'a' then
+        self.currentTetrimino:rotate()
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate(-1)
+        end
+    elseif key == 'd' then
+        self.currentTetrimino:rotate(-1)
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate()
+        end
+    elseif key == 'left' then
+        self:moveTetrimino(-1)
+    elseif key == 'right' then
+        self:moveTetrimino(1)
+    elseif key == 'down' then
+        self:fallTetrimino()
+    end
+end
+
+-- ゲームオーバー ステート
+local Gameover = InGame:addState 'Gameover'
+
+-- 更新
+function Gameover:update(dt)
+    self.manager:update(dt)
+end
+
+-- 描画
+function Gameover:draw()
+    -- クリア
+    lg.clear(.42, .75, .89)
+
+    -- ステージ描画
+    self:drawStage()
+
+    -- タイトル
+    lg.setColor(1, 1, 1)
+    lg.printf('GAMEOVER', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+end
+
+-- キー入力
+function Gameover:keypressed(key, scancode, isrepeat)
+    self:gotoState 'Start'
+    self.stage:fill()
 end
 
 return InGame
