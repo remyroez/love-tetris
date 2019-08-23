@@ -1,6 +1,7 @@
 
 local class = require 'middleclass'
 local lume = require 'lume'
+local Timer = require 'Timer'
 
 -- エイリアス
 local lg = love.graphics
@@ -35,8 +36,13 @@ function InGame:initialize(t)
     self.font64 = self.app.font64
     self.font32 = self.app.font32
 
+    -- タイマー
+    self.timer = Timer()
+
+    -- エンティティマネージャ
     self.manager = EntityManager()
 
+    -- ステージ
     self.stage = self.manager:add(
         Stage {
             spriteSheet = self.spriteSheetTiles,
@@ -46,15 +52,18 @@ function InGame:initialize(t)
         }
     )
 
+    -- ステージの位置
     local w, h = self.stage:getDimensions()
     self.stage.x = (self.width - w) * 0.5
     self.stage.y = (self.height - h) * 0.5
 
-    self:newTetrimino()
-
+    -- 初期状態
     self.speed = 1 / 2
-    self.timer = self.speed
+    self.counter = self.speed
+    self.level = 1
+    self.busy = true
 
+    -- スタート
     self:gotoState 'Start'
 end
 
@@ -92,10 +101,10 @@ function InGame:updateTetrimino(dt)
     local hit = false
 
     -- タイマーのカウントダウン
-    self.timer = self.timer - (dt or self.speed)
-    if self.timer < 0 then
+    self.counter = self.counter - (dt or self.speed)
+    if self.counter < 0 then
         -- タイマーのリセット
-        self.timer = self.timer + self.speed
+        self.counter = self.counter + self.speed
 
         -- 下に移動
         if self:moveTetrimino(0, 1) then
@@ -133,7 +142,7 @@ end
 function InGame:fallTetrimino()
     while not self:updateTetrimino() do
     end
-    self.timer = self.speed
+    self.counter = self.speed
 end
 
 -- テトリミノの生成
@@ -195,8 +204,28 @@ end
 -- スタート ステート
 local Start = InGame:addState 'Start'
 
+-- ステート開始
+function Start:enteredState()
+    self.busy = true
+
+    self.fade = { .42, .75, .89, 1 }
+
+    -- 開始演出
+    self.timer:tween(
+        1,
+        self,
+        { fade = { [4] = 0 } },
+        'in-out-cubic',
+        function ()
+            -- 操作可能
+            self:gotoState 'Play'
+        end
+    )
+end
+
 -- 更新
 function Start:update(dt)
+    self.timer:update(dt)
     self.manager:update(dt)
 end
 
@@ -209,17 +238,31 @@ function Start:draw()
     self:drawStage()
 
     -- タイトル
-    lg.setColor(1, 1, 1)
-    lg.printf('CHOOSE LEVEL', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+    --lg.setColor(1, 1, 1)
+    --lg.printf('CHOOSE LEVEL', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+
+    -- フェード
+    if self.fade[4] > 0 then
+        lg.setColor(unpack(self.fade))
+        lg.rectangle('fill', 0, 0, self.width, self.height)
+    end
 end
 
 -- キー入力
 function Start:keypressed(key, scancode, isrepeat)
-    self:gotoState 'Play'
+    if not self.busy then
+        self:gotoState 'Play'
+    end
 end
 
 -- プレイ ステート
 local Play = InGame:addState 'Play'
+
+-- ステート開始
+function Play:enteredState()
+    -- 新規テトリミノ
+    self:newTetrimino()
+end
 
 -- 更新
 function Play:update(dt)
@@ -261,6 +304,10 @@ end
 
 -- ゲームオーバー ステート
 local Gameover = InGame:addState 'Gameover'
+
+-- ステート開始
+function Gameover:enteredState()
+end
 
 -- 更新
 function Gameover:update(dt)
