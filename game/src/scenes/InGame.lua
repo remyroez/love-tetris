@@ -23,6 +23,7 @@ local function randomSelect(array)
 end
 
 local baseScale = 0.25
+local nextScale = 0.15
 
 -- 初期化
 function InGame:initialize(t)
@@ -61,6 +62,8 @@ function InGame:initialize(t)
     self.speed = 1 / 2
     self.counter = self.speed
     self.level = 1
+    self.lines = 0
+    self.next = {}
     self.busy = true
 
     -- スタート
@@ -147,17 +150,45 @@ end
 
 -- テトリミノの生成
 function InGame:newTetrimino()
+    self:nextTetrimino()
+end
+
+-- テトリミノの生成
+function InGame:generateNextTetriminos(n)
+    local w, h = self.stage:getDimensions()
+    local count = (n or 6) - #self.next
+    for i = 1, count do
+        table.insert(
+            self.next,
+            self.manager:add(
+                Tetrimino {
+                    spriteSheet = self.spriteSheetTiles,
+                    x = self.stage.x + w + 32, y = 0,
+                    scale = nextScale,
+                    array = randomSelect(Tetrimino.arrayNames)
+                }
+            )
+        )
+    end
+    for i, t in ipairs(self.next) do
+        local x, y = t:toPixelDimensions(0, 5)
+        t.y = self.stage.y + (i - 1) * y
+    end
+end
+
+-- テトリミノの生成
+function InGame:nextTetrimino()
+    if #self.next == 0 then
+        self:generateNextTetriminos()
+    end
     local x, y = self.stage:toPixelDimensions(3, 0)
     x = x + self.stage.x
     y = y + self.stage.y
-    self.currentTetrimino = self.manager:add(
-        Tetrimino {
-            spriteSheet = self.spriteSheetTiles,
-            x = x, y = y,
-            scale = baseScale,
-            array = randomSelect(Tetrimino.arrayNames)
-        }
-    )
+    self.currentTetrimino = lume.first(self.next)
+    self.currentTetrimino.x, self.currentTetrimino.y = x, y
+    self.currentTetrimino.scale = baseScale
+    self.next = lume.slice(self.next, 2)
+    self:generateNextTetriminos()
 end
 
 local fitcheck = {
@@ -261,7 +292,7 @@ local Play = InGame:addState 'Play'
 -- ステート開始
 function Play:enteredState()
     -- 新規テトリミノ
-    self:newTetrimino()
+    self:nextTetrimino()
 end
 
 -- 更新
