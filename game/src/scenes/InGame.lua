@@ -36,6 +36,7 @@ function InGame:initialize(t)
     self.spriteSheetParticles = self.app.spriteSheetParticles
     self.font64 = self.app.font64
     self.font32 = self.app.font32
+    self.font16 = self.app.font16
 
     -- タイマー
     self.timer = Timer()
@@ -62,6 +63,7 @@ function InGame:initialize(t)
     self.speed = 1 / 2
     self.counter = self.speed
     self.level = 1
+    self.score = 0
     self.lines = 0
     self.next = {}
     self.busy = true
@@ -72,7 +74,6 @@ end
 
 -- 破棄
 function InGame:added(parent)
-    print(self:root())
 end
 
 -- 破棄
@@ -93,9 +94,24 @@ end
 function InGame:keypressed(key, scancode, isrepeat)
 end
 
--- 現在のテトリミノの更新
+-- ステージの描画
 function InGame:drawStage()
+    -- ステージのライン
     love.graphics.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
+
+    lg.printf(
+        'LEVEL\n' .. self.level .. '\n\nSCORE\n' .. self.score .. '\n\nLINES\n' .. self.lines,
+        self.font16,
+        0,
+        self.stage.y,
+        self.stage.x - 16,
+        'right'
+    )
+
+    local w, h = self.stage:getDimensions()
+    lg.printf('NEXT', self.font16, self.stage.x + w + 16, self.stage.y, self.width, 'left')
+
+    -- エンティティの描画
     self.manager:draw()
 end
 
@@ -163,16 +179,17 @@ function InGame:generateNextTetriminos(n)
             self.manager:add(
                 Tetrimino {
                     spriteSheet = self.spriteSheetTiles,
-                    x = self.stage.x + w + 32, y = 0,
+                    x = self.stage.x + w + 16, y = 0,
                     scale = nextScale,
                     array = randomSelect(Tetrimino.arrayNames)
                 }
             )
         )
     end
+    local fh = self.font16:getHeight() * 2
     for i, t in ipairs(self.next) do
-        local x, y = t:toPixelDimensions(0, 5)
-        t.y = self.stage.y + (i - 1) * y
+        local x, y = t:toPixelDimensions(0, 4)
+        t.y = self.stage.y + (i - 1) * y + fh
     end
 end
 
