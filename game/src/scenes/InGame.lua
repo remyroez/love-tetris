@@ -24,6 +24,12 @@ end
 
 local baseScale = 0.25
 local nextScale = 0.15
+local scoreTable = {
+    40,
+    100,
+    300,
+    1200,
+}
 
 -- 初期化
 function InGame:initialize(t)
@@ -62,7 +68,7 @@ function InGame:initialize(t)
     -- 初期状態
     self.speed = 1 / 2
     self.counter = self.speed
-    self.level = 1
+    self.level = 0
     self.score = 0
     self.lines = 0
     self.next = {}
@@ -139,7 +145,12 @@ end
 -- テトリミノのマージ
 function InGame:mergeTetrimino()
     self.stage:merge(self.currentTetrimino)
-    self.stage:score()
+    local lines = self.stage:score()
+    if lines > 0 then
+        self.lines = self.lines + lines
+        self.score = self.score + scoreTable[lines] * (self.level + 1)
+        self.level = math.floor(self.lines / 10)
+    end
     self.manager:remove(self.currentTetrimino)
     self:newTetrimino()
 end
