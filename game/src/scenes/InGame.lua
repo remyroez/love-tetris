@@ -22,6 +22,7 @@ local function randomSelect(array)
     return array[love.math.random(#array)]
 end
 
+local baseSpeed = 1
 local baseScale = 0.25
 local nextScale = 0.15
 local scoreTable = {
@@ -50,23 +51,8 @@ function InGame:initialize(t)
     -- エンティティマネージャ
     self.manager = EntityManager()
 
-    -- ステージ
-    self.stage = self.manager:add(
-        Stage {
-            spriteSheet = self.spriteSheetTiles,
-            x = 0, y = 0,
-            scale = baseScale,
-            colorArray = Tetrimino.makeArray(10, 20)
-        }
-    )
-
-    -- ステージの位置
-    local w, h = self.stage:getDimensions()
-    self.stage.x = (self.width - w) * 0.5
-    self.stage.y = (self.height - h) * 0.5
-
     -- 初期状態
-    self.speed = 1 / 2
+    self.speed = baseSpeed
     self.counter = self.speed
     self.level = 0
     self.score = 0
@@ -84,6 +70,7 @@ end
 
 -- 破棄
 function InGame:destroy()
+    self.timer:destroy()
     self.manager:destroy()
     self.manager = nil
 end
@@ -101,10 +88,34 @@ function InGame:keypressed(key, scancode, isrepeat)
 end
 
 -- ステージの描画
-function InGame:drawStage()
-    -- ステージのライン
-    love.graphics.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
+function InGame:setupStage()
+    -- ステージ
+    self.stage = self.manager:add(
+        Stage {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = baseScale,
+            colorArray = Tetrimino.makeArray(10, 20)
+        }
+    )
 
+    -- ステージの位置
+    local w, h = self.stage:getDimensions()
+    self.stage.x = (self.width - w) * 0.5
+    self.stage.y = (self.height - h) * 0.5
+end
+
+-- ステージの描画
+function InGame:drawStage()
+    -- ステージ
+    if self.stage == nil then
+        return
+    end
+
+    -- ステージのライン
+    lg.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
+
+    -- スコア類
     lg.printf(
         'LEVEL\n' .. self.level .. '\n\nSCORE\n' .. self.score .. '\n\nLINES\n' .. self.lines,
         self.font16,
@@ -114,11 +125,9 @@ function InGame:drawStage()
         'right'
     )
 
+    -- 次のテトリミノ
     local w, h = self.stage:getDimensions()
     lg.printf('NEXT', self.font16, self.stage.x + w + 16, self.stage.y, self.width, 'left')
-
-    -- エンティティの描画
-    self.manager:draw()
 end
 
 -- 現在のテトリミノの更新
@@ -172,7 +181,7 @@ end
 function InGame:fallTetrimino()
     while not self:updateTetrimino() do
     end
-    self.counter = self.speed
+    self:resetCounter()
 end
 
 -- テトリミノの生成
@@ -260,12 +269,33 @@ function InGame:fitTetrimino()
     return valid
 end
 
+function InGame:resetSpeed(level)
+    level = level or self.level
+    self.speed = baseSpeed / (level + 1)
+    self:resetCounter()
+end
+
+function InGame:resetCounter(counter)
+    self.counter = counter or self.speed
+end
+
 -- スタート ステート
 local Start = InGame:addState 'Start'
 
 -- ステート開始
 function Start:enteredState()
+    -- 初期化
+    self.timer:destroy()
+    self.manager:clear()
+    self:setupStage()
+
+    -- リセット
+    self.level = 0
+    self.score = 0
+    self.lines = 0
+    self.next = {}
     self.busy = true
+    self:resetSpeed()
 
     self.fade = { .42, .75, .89, 1 }
 
@@ -295,6 +325,9 @@ function Start:draw()
 
     -- ステージ描画
     self:drawStage()
+
+    -- エンティティの描画
+    self.manager:draw()
 
     -- タイトル
     --lg.setColor(1, 1, 1)
@@ -338,26 +371,43 @@ function Play:draw()
 
     -- ステージ描画
     self:drawStage()
+
+    -- エンティティの描画
+    self.manager:draw()
 end
 
 -- キー入力
 function Play:keypressed(key, scancode, isrepeat)
     if key == 'space' or key == 'a' then
-        self.currentTetrimino:rotate()
-        if not self:fitTetrimino() then
-            self.currentTetrimino:rotate(-1)
-        end
-    elseif key == 'd' then
         self.currentTetrimino:rotate(-1)
         if not self:fitTetrimino() then
             self.currentTetrimino:rotate()
+        end
+    elseif key == 'd' then
+        self.currentTetrimino:rotate()
+        if not self:fitTetrimino() then
+            self.currentTetrimino:rotate(-1)
         end
     elseif key == 'left' then
         self:moveTetrimino(-1)
     elseif key == 'right' then
         self:moveTetrimino(1)
     elseif key == 'down' then
+        self:moveTetrimino(0, 1)
+        self:resetCounter()
+    elseif key == 'up' then
         self:fallTetrimino()
+        if self.stage:hit(self.currentTetrimino) then
+            self:gotoState 'Gameover'
+        end
+    elseif key == 'z' then
+        self.lines = self.lines + 10
+        self.level = self.level + 1
+        self:resetSpeed()
+    elseif key == 'x' then
+        self.lines = 0
+        self.level = 0
+        self:resetSpeed()
     end
 end
 
@@ -380,6 +430,13 @@ function Gameover:draw()
 
     -- ステージ描画
     self:drawStage()
+
+    -- エンティティの描画
+    self.manager:draw()
+
+    -- フェード
+    lg.setColor(.42, .75, .89, .5)
+    lg.rectangle('fill', 0, 0, self.width, self.height)
 
     -- タイトル
     lg.setColor(1, 1, 1)
