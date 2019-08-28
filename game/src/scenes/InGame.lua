@@ -22,6 +22,18 @@ local function randomSelect(array)
     return array[love.math.random(#array)]
 end
 
+local function shuffle(t)
+    local rtn = {}
+    for i = 1, #t do
+      local r = love.math.random(i)
+      if r ~= i then
+        rtn[i] = rtn[r]
+      end
+      rtn[r] = t[i]
+    end
+    return rtn
+  end
+
 local baseSpeed = 1
 local baseScale = 0.25
 local nextScale = 0.15
@@ -161,7 +173,7 @@ function InGame:mergeTetrimino()
         self.level = math.floor(self.lines / 10)
     end
     self.manager:remove(self.currentTetrimino)
-    self:newTetrimino()
+    self:nextTetrimino()
 end
 
 -- テトリミノの移動
@@ -182,11 +194,6 @@ function InGame:fallTetrimino()
     while not self:updateTetrimino() do
     end
     self:resetCounter()
-end
-
--- テトリミノの生成
-function InGame:newTetrimino()
-    self:nextTetrimino()
 end
 
 -- テトリミノの生成
