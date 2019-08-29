@@ -125,6 +125,9 @@ function InGame:drawStage()
     end
 
     -- ステージのライン
+    lg.setColor(0, 0, 0, 0.5)
+    lg.rectangle('fill', self.stage.x, self.stage.y, self.stage:getDimensions())
+    lg.setColor(1, 1, 1)
     lg.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
 
     -- スコア類
