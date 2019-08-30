@@ -70,6 +70,7 @@ function InGame:initialize(t)
     self.score = 0
     self.lines = 0
     self.next = {}
+    self.stock = {}
     self.busy = true
 
     -- スタート
@@ -125,7 +126,7 @@ function InGame:drawStage()
     end
 
     -- ステージのライン
-    lg.setColor(0, 0, 0, 0.5)
+    lg.setColor(0, 0, 0, 0.75)
     lg.rectangle('fill', self.stage.x, self.stage.y, self.stage:getDimensions())
     lg.setColor(1, 1, 1)
     lg.rectangle('line', self.stage.x, self.stage.y, self.stage:getDimensions())
@@ -199,6 +200,15 @@ function InGame:fallTetrimino()
     self:resetCounter()
 end
 
+-- 次の配列名を返す
+function InGame:nextArrayName()
+    if #self.stock == 0 then
+        self.stock = shuffle(lume.clone(Tetrimino.arrayNames))
+        print(unpack(self.stock))
+    end
+    return table.remove(self.stock)
+end
+
 -- テトリミノの生成
 function InGame:generateNextTetriminos(n)
     local w, h = self.stage:getDimensions()
@@ -211,7 +221,7 @@ function InGame:generateNextTetriminos(n)
                     spriteSheet = self.spriteSheetTiles,
                     x = self.stage.x + w + 16, y = 0,
                     scale = nextScale,
-                    array = randomSelect(Tetrimino.arrayNames)
+                    array = self:nextArrayName()
                 }
             )
         )
@@ -304,6 +314,7 @@ function Start:enteredState()
     self.score = 0
     self.lines = 0
     self.next = {}
+    self.stock = {}
     self.busy = true
     self:resetSpeed()
 
