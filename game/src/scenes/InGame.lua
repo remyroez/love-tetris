@@ -103,6 +103,15 @@ end
 -- ステージの描画
 function InGame:setupStage()
     -- ステージ
+    self.backstage = self.manager:add(
+        Stage {
+            spriteSheet = self.spriteSheetTiles,
+            x = 0, y = 0,
+            scale = baseScale,
+            colorArray = Tetrimino.makeArray(10, 20, 'black'),
+            alpha = 0.25
+        }
+    )
     self.stage = self.manager:add(
         Stage {
             spriteSheet = self.spriteSheetTiles,
@@ -116,6 +125,8 @@ function InGame:setupStage()
     local w, h = self.stage:getDimensions()
     self.stage.x = (self.width - w) * 0.5
     self.stage.y = (self.height - h) * 0.5
+    self.backstage.x = self.stage.x
+    self.backstage.y = self.stage.y
 end
 
 -- ステージの描画

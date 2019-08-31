@@ -220,6 +220,7 @@ function Tetrimino:initialize(t)
     local color = t.color or Tetrimino.arrayColors[array] or 'red'
     self.blockWidth, self.blockHeight = self:getSpriteSize(Tetrimino.spriteNames[color])
     self.colorArray = t.colorArray or Tetrimino.makeColorArray(Tetrimino.arrays[array], color)
+    self.alpha = t.alpha or 1
     self:refresh()
 end
 
@@ -234,6 +235,11 @@ end
 -- 描画
 function Tetrimino:draw()
     love.graphics.push()
+    local r, g, b, a = 0, 0, 0, 0
+    if self.alpha < 1 then
+        r, g, b, a = love.graphics.getColor()
+        love.graphics.setColor(1, 1, 1, self.alpha)
+    end
     love.graphics.translate(self.x, self.y)
     love.graphics.scale(self.scale)
     love.graphics.rotate(self.rotation)
@@ -247,6 +253,9 @@ function Tetrimino:draw()
         end
         x = 0
         y = y + self.blockHeight
+    end
+    if self.alpha < 1 then
+        love.graphics.setColor(r, g, b, a)
     end
     love.graphics.pop()
 end
