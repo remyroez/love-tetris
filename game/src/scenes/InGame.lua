@@ -215,7 +215,6 @@ end
 function InGame:nextArrayName()
     if #self.stock == 0 then
         self.stock = shuffle(lume.clone(Tetrimino.arrayNames))
-        print(unpack(self.stock))
     end
     return table.remove(self.stock)
 end
@@ -344,6 +343,11 @@ function Start:enteredState()
     )
 end
 
+-- ステート終了
+function Start:exitedState()
+    self.timer:destroy()
+end
+
 -- 更新
 function Start:update(dt)
     self.timer:update(dt)
@@ -448,10 +452,43 @@ local Gameover = InGame:addState 'Gameover'
 
 -- ステート開始
 function Gameover:enteredState()
+    -- 初期化
+    self.timer:destroy()
+    self.fade = { .42, .75, .89, 0 }
+    self.alpha = 0
+    self.busy = true
+    self.offset = self.height
+    self.visiblePressAnyKey = true
+
+    -- 開始演出
+    self.timer:tween(
+        1,
+        self,
+        { alpha = .5, offset = 0 },
+        'in-out-cubic',
+        function ()
+            -- キー入力表示の点滅
+            self.timer:every(
+                0.5,
+                function ()
+                    self.visiblePressAnyKey = not self.visiblePressAnyKey
+                end
+            )
+
+            -- 操作可能
+            self.busy = false
+        end
+    )
+end
+
+-- ステート終了
+function Gameover:exitedState()
+    self.timer:destroy()
 end
 
 -- 更新
 function Gameover:update(dt)
+    self.timer:update(dt)
     self.manager:update(dt)
 end
 
@@ -467,18 +504,41 @@ function Gameover:draw()
     self.manager:draw()
 
     -- フェード
-    lg.setColor(.42, .75, .89, .5)
-    lg.rectangle('fill', 0, 0, self.width, self.height)
+    if self.alpha > 0 then
+        lg.setColor(.42, .75, .89, self.alpha)
+        lg.rectangle('fill', 0, 0, self.width, self.height)
+    end
 
     -- タイトル
     lg.setColor(1, 1, 1)
-    lg.printf('GAMEOVER', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+    lg.printf('GAMEOVER', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5 - self.offset, self.width, 'center')
+
+    -- キー入力表示
+    if not self.busy and self.visiblePressAnyKey then
+        lg.printf('PRESS ANY KEY TO CONTINUE', self.font32, 0, self.height * 0.7 - self.font32:getHeight() * 0.5, self.width, 'center')
+    end
+
+    -- フェード
+    if self.fade[4] > 0 then
+        lg.setColor(self.fade)
+        lg.rectangle('fill', 0, 0, self.width, self.height)
+    end
 end
 
 -- キー入力
 function Gameover:keypressed(key, scancode, isrepeat)
-    self:gotoState 'Start'
-    self.stage:fill()
+    if not self.busy then
+        self.busy = true
+        self.timer:tween(
+            1,
+            self,
+            { fade = { [4] = 1 }, offset = 0 },
+            'in-out-cubic',
+            function ()
+                self:gotoState 'Start'
+            end
+        )
+    end
 end
 
 return InGame
