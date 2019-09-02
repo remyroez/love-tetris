@@ -39,12 +39,13 @@ function Title:initialize(t)
     self.visiblePressAnyKey = true
     self.fade = { .42, .75, .89, 1 }
     self.alpha = 0
+    self.offset = -self.height
 
     -- 開始演出
     self.timer:tween(
         1,
         self,
-        { fade = { [4] = 0 }, alpha = 1 },
+        { fade = { [4] = 0 }, alpha = 1, offset = 0 },
         'in-out-cubic',
         function ()
             -- キー入力表示の点滅
@@ -81,7 +82,7 @@ function Title:draw()
 
     -- タイトル
     lg.setColor(1, 1, 1, self.alpha)
-    lg.printf('TETRIS', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5, self.width, 'center')
+    lg.printf('TETRIS', self.font64, 0, self.height * 0.3 - self.font64:getHeight() * 0.5 + self.offset, self.width, 'center')
 
     -- キー入力表示
     if not self.busy and self.visiblePressAnyKey then
