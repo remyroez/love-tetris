@@ -7,7 +7,7 @@ local Game = require(folderOfThisFile .. 'class')
 -- クラス
 local Application = require 'Application'
 local EntityStack = require 'EntityStack'
-local InGame = require 'scenes.InGame'
+local Splash = require 'scenes.Splash'
 
 -- エイリアス
 local lg = love.graphics
@@ -29,12 +29,16 @@ function Game:load(...)
     self.spriteSheetParticles = sbss:new('assets/spritesheet_particles.xml')
     self.spriteSheetTiles = sbss:new('assets/spritesheet_tiles.xml')
 
+    -- フォントの読み込み
+    local fontPath = 'assets/KenPixel Blocks.ttf'
+    self.font64 = lg.newFont(fontPath, 64)
+    self.font32 = lg.newFont(fontPath, 32)
+    self.font16 = lg.newFont(fontPath, 16)
+    self.font8 = lg.newFont(fontPath, 8)
+
     self.scene = EntityStack()
-    self.scene:add(InGame{
-        width = self.width,
-        height = self.height,
-        spriteSheetTiles = self.spriteSheetTiles,
-        spriteSheetParticles = self.spriteSheetParticles,
+    self.scene:add(Splash{
+        app = self,
     })
 end
 
