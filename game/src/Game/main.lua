@@ -36,6 +36,27 @@ function Game:load(...)
     self.font16 = lg.newFont(fontPath, 16)
     self.font8 = lg.newFont(fontPath, 8)
 
+
+    -- 音楽
+    local musics = {
+        ingame = 'Mishief Stroll.ogg',
+        --outgame = 'Mishief Stroll.ogg',
+    }
+    self.musics = {}
+    for name, path in pairs(musics) do
+        self.musics[name] = love.audio.newSource('assets/' .. path, 'static')
+        self.musics[name]:setLooping(true)
+        self.musics[name]:setVolume(0.5)
+    end
+
+    -- ＳＥ
+    local sounds = {
+    }
+    self.sounds = {}
+    for name, path in pairs(sounds) do
+        self.sounds[name] = love.audio.newSource('assets/' .. path, 'static')
+    end
+
     self.scene = EntityStack()
     self.scene:add(Splash{
         app = self,
