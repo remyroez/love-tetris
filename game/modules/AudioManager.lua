@@ -65,6 +65,15 @@ function AudioManager:stopMusic()
     self.currentMusic = nil
 end
 
+-- 音楽の再生位置の設定
+function AudioManager:seekMusic(name, offset, unit)
+    offset = offset or 0
+    local music = self:getMusic(name)
+    if music then
+        music:seek(offset, unit)
+    end
+end
+
 -- サウンドの読み込み
 function AudioManager:loadSound(paths, opt)
     opt = opt or {}

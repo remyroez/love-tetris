@@ -514,6 +514,7 @@ end
 function Gameover:exitedState()
     self.timer:destroy()
     self.audio:stopSound('gameover')
+    self.audio:seekMusic('ingame')
 end
 
 -- 更新
