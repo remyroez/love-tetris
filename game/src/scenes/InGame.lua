@@ -57,6 +57,9 @@ function InGame:initialize(t)
     self.font32 = self.app.font32
     self.font16 = self.app.font16
 
+    -- オーディオ
+    self.audio = self.app.audio or {}
+
     -- タイマー
     self.timer = Timer()
 
@@ -186,6 +189,9 @@ function InGame:mergeTetrimino()
         self.lines = self.lines + lines
         self.score = self.score + scoreTable[lines] * (self.level + 1)
         self.level = math.floor(self.lines / 10)
+        self.audio:playSound('score')
+    else
+        self.audio:playSound('fall')
     end
     self.manager:remove(self.currentTetrimino)
     self:nextTetrimino()
@@ -330,6 +336,9 @@ function Start:enteredState()
 
     self.fade = { .42, .75, .89, 1 }
 
+    -- ＢＧＭ
+    self.audio:playMusic('ingame')
+
     -- 開始演出
     self.timer:tween(
         1,
@@ -392,6 +401,11 @@ function Play:enteredState()
     self:nextTetrimino()
 end
 
+-- ステート終了
+function Play:exitedState()
+    self.audio:stopMusic()
+end
+
 -- 更新
 function Play:update(dt)
     self.manager:update(dt)
@@ -418,19 +432,31 @@ function Play:keypressed(key, scancode, isrepeat)
         self.currentTetrimino:rotate(-1)
         if not self:fitTetrimino() then
             self.currentTetrimino:rotate()
+        else
+            self.audio:playSound('move')
         end
     elseif key == 'd' then
+        self.audio:playSound('move')
         self.currentTetrimino:rotate()
         if not self:fitTetrimino() then
             self.currentTetrimino:rotate(-1)
+        else
+            self.audio:playSound('move')
         end
     elseif key == 'left' then
-        self:moveTetrimino(-1)
+        if not self:moveTetrimino(-1) then
+            self.audio:playSound('move')
+        end
     elseif key == 'right' then
-        self:moveTetrimino(1)
+        if not self:moveTetrimino(1) then
+            self.audio:playSound('move')
+        end
     elseif key == 'down' then
-        self:moveTetrimino(0, 1)
-        self:resetCounter()
+        self.audio:playSound('move')
+        if not self:moveTetrimino(0, 1) then
+            self.audio:playSound('move')
+            self:resetCounter()
+        end
     elseif key == 'up' then
         self:fallTetrimino()
         if self.stage:hit(self.currentTetrimino) then
@@ -460,6 +486,9 @@ function Gameover:enteredState()
     self.offset = self.height
     self.visiblePressAnyKey = true
 
+    -- ＳＥ
+    self.audio:playSound('gameover')
+
     -- 開始演出
     self.timer:tween(
         1,
@@ -484,6 +513,8 @@ end
 -- ステート終了
 function Gameover:exitedState()
     self.timer:destroy()
+    self.audio:stopSound('gameover')
+    self.audio:seekMusic('ingame')
 end
 
 -- 更新
@@ -528,6 +559,7 @@ end
 -- キー入力
 function Gameover:keypressed(key, scancode, isrepeat)
     if not self.busy then
+        self.audio:playSound('ok')
         self.busy = true
         self.timer:tween(
             1,

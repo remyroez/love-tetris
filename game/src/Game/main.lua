@@ -8,6 +8,7 @@ local Game = require(folderOfThisFile .. 'class')
 local Application = require 'Application'
 local EntityStack = require 'EntityStack'
 local Splash = require 'scenes.Splash'
+local AudioManager = require 'AudioManager'
 
 -- エイリアス
 local lg = love.graphics
@@ -36,6 +37,35 @@ function Game:load(...)
     self.font16 = lg.newFont(fontPath, 16)
     self.font8 = lg.newFont(fontPath, 8)
 
+    -- オーディオマネージャ
+    self.audio = AudioManager()
+
+    -- 音楽
+    self.audio:loadMusic(
+        {
+            ingame = 'Mishief Stroll.ogg',
+        },
+        {
+            basepath = 'assets',
+            volume = 0.5,
+        }
+    )
+
+    -- ＳＥ
+    self.audio:loadSound(
+        {
+            gameover = 'Serious ident.ogg',
+            ok = 'upgrade1.ogg',
+            move = 'coin5.ogg',
+            fall = 'hurt2.ogg',
+            score = 'hit2.ogg',
+        },
+        {
+            basepath = 'assets',
+        }
+    )
+
+    -- シーン
     self.scene = EntityStack()
     self.scene:add(Splash{
         app = self,

@@ -31,6 +31,10 @@ function Title:initialize(t)
     self.font64 = self.app.font64
     self.font32 = self.app.font32
 
+    -- オーディオ
+    self.audio = self.app.audio or {}
+    self.audio:playMusic('ingame')
+
     -- タイマー
     self.timer = Timer()
 
@@ -101,6 +105,9 @@ function Title:keypressed(key, scancode, isrepeat)
     if not self.busy then
         -- 操作不可
         self.busy = true
+
+        -- ＳＥ
+        self.audio:playSound('ok')
 
         -- 終了演出
         self.timer:tween(
