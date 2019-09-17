@@ -462,6 +462,8 @@ function Play:keypressed(key, scancode, isrepeat)
         if self.stage:hit(self.currentTetrimino) then
             self:gotoState 'Gameover'
         end
+    elseif not self.app.debugMode then
+        -- 以下、デバッグモードのみ
     elseif key == 'z' then
         self.lines = self.lines + 10
         self.level = self.level + 1

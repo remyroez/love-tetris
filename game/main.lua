@@ -4,7 +4,7 @@ require 'autobatch'
 require 'sbss'
 
 -- デバッグモード
-local debugMode = true
+local debugMode = false
 
 -- フォーカス
 local pauseOnUnfocus = true

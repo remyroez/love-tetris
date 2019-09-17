@@ -2,6 +2,20 @@
 
 :black_square_button: Tetris game with LÖVE
 
+![Screenshot](https://user-images.githubusercontent.com/1193542/64958539-65894880-d8ca-11e9-8dce-ef4582d35a1f.png)
+
+## Controls
+
+- In Title
+    - Start: Any key
+- In Game
+    - Move: Left / Right key
+    - Soft drop: Down key
+    - Hard drop: Up key
+    - Rotate: A / D
+- In Gameover
+    - Retry: Any key
+
 ## Getting Started
 
 ### Quick Start
