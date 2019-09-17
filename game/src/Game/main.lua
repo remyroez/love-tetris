@@ -80,6 +80,12 @@ end
 -- 描画
 function Game:draw(...)
     self.scene:draw()
+
+    -- デバッグモード表示
+    if self.debugMode then
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print('debug mode')
+    end
 end
 
 -- キー入力
