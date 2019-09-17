@@ -2,7 +2,7 @@
 
 :black_square_button: Tetris game with LÖVE
 
-![Screenshot](https://user-images.githubusercontent.com/1193542/58362964-6ee44480-7ed8-11e9-9895-05b97cd3d7ba.png)
+![Screenshot](https://user-images.githubusercontent.com/1193542/64958539-65894880-d8ca-11e9-8dce-ef4582d35a1f.png)
 
 ## Controls
 
